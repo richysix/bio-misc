@@ -128,6 +128,9 @@ sub get_three_prime_extension_seq {
         }
     }
 
+    # Don't extend if extension completely overlaps another gene
+    return $seq if $min_distance < 1;
+
     # Get new slice corresponding to reduced 3' extension
     if ( $min_distance < $three_prime_extension_length ) {
         ( $extension_start, $extension_end ) =
