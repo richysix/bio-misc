@@ -82,6 +82,7 @@ foreach my $gene ( @{$genes} ) {
 
         $fasta_out->write_seq($seq);
     }
+    $gene->flush_Transcripts();    # Save memory
 }
 
 # Get 3' extension sequence
