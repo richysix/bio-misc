@@ -22,6 +22,7 @@ my ( $debug, $help, $man );
 get_and_check_options();
 
 # Iterate over GTF on STDIN
+my @exons;
 while ( my $line = <> ) {
 
     # Skip header
@@ -38,10 +39,20 @@ while ( my $line = <> ) {
 
     my ( $gene_id, $transcript_id, $exon_id, $exon_ordinal ) =
       parse_attributes($attributes);
-    my $name = sprintf '%s-%s-%s-%d', $gene_id, $transcript_id, $exon_id,
-      $exon_ordinal;
 
-    printf "%s\t%d\t%d\t%s\t.\t%s\n", $seq, $start - 1, $end, $name, $strand;
+    # Print if starting a new transcript
+    ## no critic (ProhibitMagicNumbers)
+    if ( @exons && $exons[0]->[5] ne $transcript_id ) {
+        ## use critic
+        print_exons( \@exons );
+        @exons = ();
+    }
+
+    push @exons,
+      [
+        $seq,     $start,         $end,     $strand,
+        $gene_id, $transcript_id, $exon_id, $exon_ordinal
+      ];
 }
 
 # Parse attributes field and extract specific types
@@ -60,6 +71,25 @@ sub parse_attributes {
 
     return $attribute{gene_id}, $attribute{transcript_id}, $attribute{exon_id},
       $attribute{exon_number};
+}
+
+# Print exons making up a transcript
+sub print_exons {
+    my ($exons) = @_;
+
+    my $max_exon_ordinal = $exons->[-1]->[-1];
+
+    foreach my $exon ( @{$exons} ) {
+        my ( $seq, $start, $end, $strand, $gene_id, $transcript_id, $exon_id,
+            $exon_ordinal )
+          = @{$exon};
+        my $name = sprintf '%s-%s-%s-%d-%d', $gene_id, $transcript_id, $exon_id,
+          $exon_ordinal, $max_exon_ordinal;
+        printf "%s\t%d\t%d\t%s\t.\t%s\n", $seq, $start - 1, $end, $name,
+          $strand;
+    }
+
+    return;
 }
 
 # Get and check command line options
