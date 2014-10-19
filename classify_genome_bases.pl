@@ -17,6 +17,7 @@ use version; our $VERSION = qv('v0.1.0');
 
 use Readonly;
 use List::Util qw( max );
+use Sort::Naturally;
 use Bio::EnsEMBL::Registry;
 use Set::IntervalTree;
 
@@ -71,7 +72,9 @@ else {
 my $slices = $sa->fetch_all('toplevel');
 warn scalar @{$slices}, " slices\n" if $debug;
 
-foreach my $slice ( @{$slices} ) {
+foreach my $slice ( sort { ncmp( $a->seq_region_name, $b->seq_region_name ) }
+    @{$slices} )
+{
     warn 'Slice: ', $slice->name, "\n" if $debug;
 
     my $tree = Set::IntervalTree->new;
