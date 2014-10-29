@@ -69,7 +69,7 @@ foreach my $slice ( sort { ncmp( $a->seq_region_name, $b->seq_region_name ) }
         my $name = join q{,}, $repeat->repeat_consensus->repeat_type,
           $repeat->repeat_consensus->repeat_class,
           $repeat->repeat_consensus->name;
-        my $strand = q{};
+        my $strand = q{.};
         if ( $repeat->seq_region_strand == -1 ) {
             $strand = q{-};
         }
