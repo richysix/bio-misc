@@ -135,11 +135,11 @@ denominator (e.g. sibling) fields.
 
 =over 8
 
-=item B<--key FIELD...>
+=item B<--numerator FIELD...>
 
 The field (or fields) that specify the numerator (e.g. mutant).
 
-=item B<--merge FIELD...>
+=item B<--denominator FIELD...>
 
 The field (or fields) that specify the denominator (e.g. sibling).
 
