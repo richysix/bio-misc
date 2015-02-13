@@ -16,8 +16,6 @@ use Carp;
 use version; our $VERSION = qv('v0.1.0');
 
 use Bio::EnsEMBL::Registry;
-use Bio::Seq;
-use Bio::SeqIO;
 
 # Default options
 my $species        = 'Danio rerio';
