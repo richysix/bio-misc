@@ -12,19 +12,26 @@ pdfFile     <- ifelse(is.na(Args[8]), "counts.pdf",         Args[8])
 # Read data
 data <- read.delim(dataFile, header=TRUE)
 
+# Support different column names
+names(data)[names(data) == 'chr']     <- 'Chr'
+names(data)[names(data) == 'start']   <- 'Start'
+names(data)[names(data) == 'end']     <- 'End'
+names(data)[names(data) == 'ID']      <- 'Gene.ID'
+names(data)[names(data) == 'adjpval'] <- 'adjp'
+
 # Read samples
 samples <- read.table( samplesFile, header=TRUE, row.names=1 )
 
 # Graph parameters
-labels <- gsub(".normalised.count$", "",
-               names(data)[grepl(".normalised.count$", names(data))])
+labels <- gsub(".normalised.*$", "",
+               names(data)[grepl(".normalised.*$", names(data))])
 colours <- as.numeric(samples[labels, "condition"])
 
 pdf(pdfFile)
 
 # Plot each region separately
 for (i in 1:nrow(data)) {
-    counts <- data[i, grepl(".normalised.count$", names(data)) ]
+    counts <- data[i, grepl(".normalised.*$", names(data)) ]
     par(mar=c(8.1, 4.1, 4.1, 2.1), xpd=TRUE)
     plot(as.numeric(counts), axes=FALSE, ann=FALSE, pch=21, bg=colours)
     axis(1, at=1:length(labels), lab=labels, las=2, cex.axis=0.5)
