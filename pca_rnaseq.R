@@ -4,6 +4,7 @@
 # https://gist.github.com/iansealy/2dca28d07c0764e014df
 # or https://gist.github.com/iansealy/b9cbc56bd1affe10d37a
 
+suppressWarnings(library(tcltk))
 suppressPackageStartupMessages(library(DESeq2))
 suppressPackageStartupMessages(library(genefilter))
 suppressPackageStartupMessages(library(ggplot2))
