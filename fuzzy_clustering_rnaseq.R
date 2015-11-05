@@ -31,8 +31,8 @@ samples <- read.table( samplesFile, header=TRUE, row.names=1 )
 data[,1] <- factor(data[,1])
 
 # Get counts
-countData <- data[,grepl(" normalised count$", names(data))]
-names(countData) <- gsub(" normalised count$", "", names(countData))
+countData <- data[,grepl(".normalised.count$", names(data))]
+names(countData) <- gsub(".normalised.count$", "", names(countData))
 
 # Get median counts
 medianData <- matrix(nrow=nrow(countData),
