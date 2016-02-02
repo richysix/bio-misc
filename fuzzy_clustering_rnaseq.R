@@ -42,7 +42,7 @@ medianData <- matrix(nrow=nrow(countData),
 for (condition in levels(samples$condition)) {
     medianData[,condition] <-
         apply(countData[,samples$condition == condition, drop=FALSE], 1,
-            median)
+              median)
 }
 
 # Standardise data
