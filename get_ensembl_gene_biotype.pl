@@ -42,7 +42,6 @@ warn 'Genebuild version: ', $genebuild_version, "\n" if $debug;
 
 # Get Ensembl adaptors
 my $ga = Bio::EnsEMBL::Registry->get_adaptor( $species, 'core', 'Gene' );
-my $sa = Bio::EnsEMBL::Registry->get_adaptor( $species, 'core', 'Slice' );
 
 # Ensure database connection isn't lost; Ensembl 64+ can do this more elegantly
 ## no critic (ProhibitMagicNumbers)
