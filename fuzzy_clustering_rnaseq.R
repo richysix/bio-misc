@@ -63,5 +63,5 @@ for (i in 1:numClusters) {
     data.subset <- data[c(as.character(acore.list[[i]][,1])),]
     write.table(data.subset, file=paste0(outputBase, '-', numClusters, '-',
                                          alphaThreshold, '-', i, '.tsv'),
-                quote=FALSE, sep='\t', row.names=TRUE, col.names=TRUE)
+                quote=FALSE, sep='\t', row.names=FALSE, col.names=TRUE)
 }
