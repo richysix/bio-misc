@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Estimate clusters using RNA-Seq output produced by:
+# Hard clustering and cluster size estimation from RNA-Seq output produced by:
 # https://gist.github.com/iansealy/2dca28d07c0764e014df
 # or https://gist.github.com/iansealy/b9cbc56bd1affe10d37a
 
