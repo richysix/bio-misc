@@ -4,8 +4,6 @@
 # https://gist.github.com/iansealy/2dca28d07c0764e014df
 # or https://gist.github.com/iansealy/b9cbc56bd1affe10d37a
 
-options(scipen=100)
-
 suppressPackageStartupMessages(library(hopach))
 library(naturalsort)
 
@@ -52,6 +50,9 @@ hobj <- hopach(medianData, dmat=distMatrix)
 # Output clusters and number of clusters
 write.table(hobj$clust$k, file=paste0(outputBase, '-num-clusters.tsv'),
             quote=FALSE, sep='\t', row.names=FALSE, col.names=FALSE)
-df <- data.frame(ID=data[,1], cluster=hobj$clust$labels)
-write.table(df, file=paste0(outputBase, '-clusters.tsv'),
+options(scipen=100)
+clusters <- as.character(hobj$clust$labels)
+options(scipen=0)
+data$cluster <- clusters
+write.table(data, file=paste0(outputBase, '-clusters.tsv'),
             quote=FALSE, sep='\t', row.names=FALSE, col.names=TRUE)
