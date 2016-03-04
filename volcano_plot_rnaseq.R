@@ -17,7 +17,8 @@ names(data)[names(data) == 'adjpval'] <- 'adjp'
 # Plot (red if adjp < 0.05; orange if log2fc > 1; green if both)
 png(outputFile)
 with(data, plot(log2fc, -log10(adjp), pch=20, main="Volcano plot",
-                xlim=c(-max(abs(log2fc)), max(abs(log2fc)))))
+                xlim=c(-max(abs(log2fc), na.rm=TRUE),
+                       max(abs(log2fc), na.rm=TRUE))))
 with(subset(data, adjp < 0.05 ), points(log2fc, -log10(adjp), pch=20,
                                         col="red"))
 with(subset(data, abs(log2fc) > 1), points(log2fc, -log10(adjp), pch=20,
