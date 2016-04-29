@@ -24,17 +24,20 @@ Readonly our @CORE_FIELDS => ( 0 .. 10 );
 # Default options
 my $input_file;
 my $samples_file;
+my @metadata_files;
 my ( $debug, $help, $man );
 
 # Get and check command line options
 get_and_check_options();
 
-my @sample_cols = output_header( $input_file, $samples_file );
+my @sample_cols = output_header( $input_file, $samples_file, @metadata_files );
 output_regions( $input_file, @sample_cols );
 
-# Get regions of interest
+# Output header
 sub output_header {
-    my ( $input_file, $samples_file ) = @_;   ## no critic (ProhibitReusedNames)
+    ## no critic (ProhibitReusedNames)
+    my ( $input_file, $samples_file, @metadata_files ) = @_;
+    ## use critic
 
     # Get input headings
     open my $input_fh, '<', $input_file;
@@ -43,8 +46,8 @@ sub output_header {
     my @headings = split /\t/xms, $header;
     close $input_fh;
 
-    my @sample_cols;                          ## no critic (ProhibitReusedNames)
-    my $i = -1;    ## no critic (ProhibitMagicNumbers)
+    my @sample_cols;    ## no critic (ProhibitReusedNames)
+    my $i = -1;         ## no critic (ProhibitMagicNumbers)
     foreach my $heading (@headings) {
         $i++;
         if ( $heading =~ m/\s normalised \s count \z/xms ) {
@@ -66,10 +69,19 @@ sub output_header {
 
     printf "%s\n", join "\t", @output_headings;
 
-    return @sample_cols if !$samples_file;
+    if ($samples_file) {
+        output_samples_header($samples_file);
+    }
+
+    return @sample_cols;
+}
+
+# Output samples header
+sub output_samples_header {
+    my ($samples_file) = @_;    ## no critic (ProhibitReusedNames)
 
     open my $samples_fh, '<', $samples_file;
-    $header = <$samples_fh>;
+    my $header = <$samples_fh>;
     $header =~ s/\A \s+//xms;
     my @columns = split /\s+/xms, $header;
     close $samples_fh;
@@ -111,7 +123,7 @@ sub output_header {
         printf "%s\n", join "\t", @{$headings};
     }
 
-    return @sample_cols;
+    return;
 }
 
 # Output regions of interest
@@ -170,11 +182,12 @@ sub get_and_check_options {
 
     # Get options
     GetOptions(
-        'input_file=s'   => \$input_file,
-        'samples_file=s' => \$samples_file,
-        'debug'          => \$debug,
-        'help'           => \$help,
-        'man'            => \$man,
+        'input_file=s'         => \$input_file,
+        'samples_file=s'       => \$samples_file,
+        'metadata_files=s@{,}' => \@metadata_files,
+        'debug'                => \$debug,
+        'help'                 => \$help,
+        'man'                  => \$man,
     ) or pod2usage(2);
 
     # Documentation
@@ -225,11 +238,21 @@ required by BioLayout Express3D.
         convert_rnaseq_to_biolayout.pl \
         --input_file all.tsv --samples_file samples.txt > all.expression
 
+    perl \
+        convert_rnaseq_to_biolayout.pl \
+        --input_file all.tsv --samples_file samples.txt \
+        --metadata_files \
+            QC_all_stages_lab.tsv \
+            QC_all_stages_npg.tsv \
+            QC_all_stages_post_DETCT.tsv \
+        > all.expression
+
 =head1 USAGE
 
     convert_to_biolayout.pl
         [--input_file file]
         [--samples_file file]
+        [--metadata_files files]
         [--debug]
         [--help]
         [--man]
@@ -245,6 +268,10 @@ RNA-Seq output file (e.g. all.tsv).
 =item B<--samples_file FILE>
 
 DESeq2 samples file (e.g. samples.txt).
+
+=item B<--metadata_files FILES>
+
+QC metadata files.
 
 =item B<--debug>
 
