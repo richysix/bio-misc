@@ -50,7 +50,7 @@ foreach ( @{$ary_ref} ) {
     $name_for{$name} = $supplier_name;
 }
 
-# Iterate over STDIN and merge exons into genes
+# Iterate over STDIN
 while ( my $line = <> ) {
     $line =~ s/\b(\d+STDY\d+)\b/$name_for{$1} || $1/xmsge;
     printf '%s', $line;
