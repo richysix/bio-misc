@@ -86,16 +86,17 @@ sub output {
             }
             my @values;
             foreach my $line ( @{ $data_for->{$key} } ) {
-                push @values, $line->[ $i - 1 ];
+                if ( defined $line->[ $i - 1 ] && $line->[ $i - 1 ] ne q{} ) {
+                    push @values, $line->[ $i - 1 ];
+                }
             }
             my $output_value = 0;
             if ( $is_sum{$i} || $is_mean{$i} ) {
                 foreach my $value (@values) {
-                    next if !$value;
                     $output_value += $value;
                 }
                 if ( $is_mean{$i} ) {
-                    $output_value /= scalar grep { $_ } @values;
+                    $output_value /= scalar @values;
                 }
             }
             else {
