@@ -91,10 +91,11 @@ sub output {
             my $output_value = 0;
             if ( $is_sum{$i} || $is_mean{$i} ) {
                 foreach my $value (@values) {
+                    next if !$value;
                     $output_value += $value;
                 }
                 if ( $is_mean{$i} ) {
-                    $output_value /= scalar @values;
+                    $output_value /= scalar grep { $_ } @values;
                 }
             }
             else {
