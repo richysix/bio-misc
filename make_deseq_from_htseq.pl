@@ -18,6 +18,7 @@ use version; our $VERSION = qv('v0.1.0');
 use Readonly;
 use DBI;
 use File::Spec;
+use Path::Tiny;
 
 # Constants
 Readonly our $COUNTS_FILE  => 'counts.txt';
@@ -52,6 +53,13 @@ SQL
 foreach ( @{$ary_ref} ) {
     my ( $name, $supplier_name ) = @{$_};
     $name_for{$name} = $supplier_name;
+}
+
+# If only one count file then assume it's a list of count files
+if ( scalar @count_files == 1 ) {
+    my $count_files = path( $count_files[0] )->slurp;
+    chomp $count_files;
+    @count_files = split /[\r\n]+/xms, $count_files;
 }
 
 # Get filehandles for all count files
@@ -159,6 +167,9 @@ with more readable sample names (e.g. zmp_ph250_E4_p2).
         make_deseq_from_htseq.pl \
             --count_files 21somites_1.count 21somites_2.count
 
+    perl \
+        make_deseq_from_htseq.pl --count_files somites.fofn
+
 =head1 USAGE
 
     make_deseq_from_htseq.pl
@@ -173,7 +184,8 @@ with more readable sample names (e.g. zmp_ph250_E4_p2).
 
 =item B<--count_files FILE...>
 
-htseq-count output files.
+htseq-count output files. If just one file is specified then it's assumed to be
+a file of filenames.
 
 =item B<--debug>
 
