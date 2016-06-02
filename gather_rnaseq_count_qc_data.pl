@@ -78,6 +78,16 @@ SQL
     }
 }
 
+if ( !@expts ) {
+    foreach my $sample ( sort { ncmp( $a, $b ) } keys %{$genomic_count} ) {
+        my @values = ($sample);
+        push @values, $genomic_count->{$sample};
+        push @values, $spike_count->{$sample};
+        @values = map { !defined $_ ? q{} : $_ } @values;
+        printf "%s\n", join "\t", @values;
+    }
+}
+
 # Get counts from input file
 sub get_counts {
     my ($file) = @_;
@@ -151,9 +161,6 @@ sub get_and_check_options {
     if ( !$input_file ) {
         pod2usage("--input_file must be specified\n");
     }
-    if ( !@expts ) {
-        pod2usage("--expts must be specified\n");
-    }
 
     return;
 }
@@ -177,14 +184,18 @@ version 0.1.0
 
 This script takes a tab-delimited file of RNA-Seq output produced by
 https://gist.github.com/iansealy/2dca28d07c0764e014df or
-https://gist.github.com/iansealy/b9cbc56bd1affe10d37a and a list of experiment
-prefixes (e.g. zmp_ph80) and gathers count data for QC.
+https://gist.github.com/iansealy/b9cbc56bd1affe10d37a and an optional list of
+experiment prefixes (e.g. zmp_ph80) and gathers count data for QC.
 
 =head1 EXAMPLES
 
     perl \
         gather_rnaseq_count_qc_data.pl \
         --input_file all.tsv --expts zmp_ph80 zmp_ph81 > count_qc.tsv
+
+    perl \
+        gather_rnaseq_count_qc_data.pl \
+        --input_file all.tsv > count_qc.tsv
 
 =head1 USAGE
 
