@@ -27,23 +27,24 @@ my $samples_file;
 my $readable_samples;
 my $config_file;
 my @metadata_files;
+my $sample_regexp;
 my ( $debug, $help, $man );
 
 # Get and check command line options
 get_and_check_options();
 
 my @sample_cols = output_header(
-    $input_file,  $samples_file, $readable_samples,
-    $config_file, @metadata_files
+    $input_file,  $samples_file,  $readable_samples,
+    $config_file, $sample_regexp, @metadata_files
 );
 output_regions( $input_file, @sample_cols );
 
 # Output header
-sub output_header {
+sub output_header {    ## no critic (ProhibitManyArgs)
     ## no critic (ProhibitReusedNames)
     my (
-        $input_file,  $samples_file, $readable_samples,
-        $config_file, @metadata_files
+        $input_file,  $samples_file,  $readable_samples,
+        $config_file, $sample_regexp, @metadata_files
     ) = @_;
     ## use critic
 
@@ -61,9 +62,11 @@ sub output_header {
     foreach my $heading (@headings) {
         $i++;
         if ( $heading =~ m/\s normalised \s count \z/xms ) {
-            push @sample_cols, $i;
             $heading =~ s/\s normalised \s count \z//xms;
-            $sample_to_col{$heading} = ++$col;
+            if ( !$sample_regexp || $heading =~ m/$sample_regexp/xms ) {
+                push @sample_cols, $i;
+                $sample_to_col{$heading} = ++$col;
+            }
         }
     }
 
@@ -81,7 +84,8 @@ sub output_header {
     my @all_output_headings = ( \@output_headings );
 
     if ($samples_file) {
-        push @all_output_headings, output_samples_header($samples_file);
+        push @all_output_headings,
+          output_samples_header( $samples_file, \%sample_to_col );
     }
     if (@metadata_files) {
         push @all_output_headings,
@@ -113,7 +117,9 @@ sub output_header {
 
 # Output samples header
 sub output_samples_header {
-    my ($samples_file) = @_;    ## no critic (ProhibitReusedNames)
+    ## no critic (ProhibitReusedNames)
+    my ( $samples_file, $sample_to_col ) = @_;
+    ## use critic
 
     open my $samples_fh, '<', $samples_file;    ## no critic (RequireBriefOpen)
     my $header = <$samples_fh>;
@@ -137,6 +143,7 @@ sub output_samples_header {
         while ( my $line = <$samples_fh> ) {
             chomp $line;
             my @fields = split /\s+/xms, $line;
+            next if !exists $sample_to_col->{ $fields[0] };
             push @sample_headings, $fields[$col];
         }
         close $samples_fh;
@@ -301,6 +308,7 @@ sub get_and_check_options {
         'readable_samples'     => \$readable_samples,
         'config_file=s'        => \$config_file,
         'metadata_files=s@{,}' => \@metadata_files,
+        'sample_regexp=s'      => \$sample_regexp,
         'debug'                => \$debug,
         'help'                 => \$help,
         'man'                  => \$man,
@@ -367,6 +375,12 @@ required by BioLayout Express3D.
             QC_all_stages_post_DETCT.tsv \
         > all.expression
 
+    perl \
+        convert_rnaseq_to_biolayout.pl \
+        --input_file all.tsv --samples_file samples.txt \
+        --sample_regexp 'rep$'
+        > all.expression
+
 =head1 USAGE
 
     convert_to_biolayout.pl
@@ -375,6 +389,7 @@ required by BioLayout Express3D.
         [--readable_samples]
         [--config_file file]
         [--metadata_files files]
+        [--sample_regexp regexp]
         [--debug]
         [--help]
         [--man]
@@ -404,6 +419,10 @@ second column.
 =item B<--metadata_files FILES>
 
 QC metadata files.
+
+=item B<--sample_regexp REGEXP>
+
+Regular expression for matching sample names.
 
 =item B<--debug>
 
