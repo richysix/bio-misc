@@ -107,8 +107,6 @@ sub output_header {    ## no critic (ProhibitManyArgs)
     }
 
     foreach my $output_headings (@all_output_headings) {
-        @{$output_headings} =
-          map { /\s/xms ? qq{"$_"} : $_ } @{$output_headings};
         printf "%s\n", join "\t", tidy_output( @{$output_headings} );
     }
 
