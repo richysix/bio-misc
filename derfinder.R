@@ -23,7 +23,7 @@ chrs <- chr.sizes$V1[chr.sizes$V1 == chr]
 chrlens <- chr.sizes$V2[chr.sizes$V1 == chr]
 if (chr == "spike") {
     chrs <- chr.sizes$V1[grepl("ERCC", chr.sizes$V1)]
-    chrlens <- chr.sizes$V21[grepl("ERCC", chr.sizes$V1)]
+    chrlens <- chr.sizes$V2[grepl("ERCC", chr.sizes$V1)]
 }
 
 fullCov <- fullCoverage(files=files, chrs=chrs, chrlens=chrlens, cutoff=cutoff)
