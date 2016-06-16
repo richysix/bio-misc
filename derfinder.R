@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 
 library(derfinder)
+suppressPackageStartupMessages(library(GenomicRanges))
 
 Args      <- commandArgs()
 chr       <- ifelse(is.na(Args[6]),  NA,            Args[6])
@@ -29,7 +30,8 @@ fullCov <- fullCoverage(files=files, chrs=chrs, chrlens=chrlens, cutoff=cutoff)
 
 regionMat <- regionMatrix(fullCov, cutoff=cutoff, L=readLen)
 
-write.table(regionMat[[1]]$regions, file=paste(chr, ".regions", sep=""),
-            quote=FALSE, sep="\t", row.names=FALSE)
+write.table(as.data.frame(regionMat[[1]]$regions),
+            file=paste(chr, ".regions", sep=""), quote=FALSE, sep="\t",
+            row.names=FALSE)
 write.table(regionMat[[1]]$coverageMatrix, file=paste(chr, ".matrix", sep=""),
             quote=FALSE, sep="\t", row.names=FALSE)
