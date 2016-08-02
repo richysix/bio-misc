@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # PODNAME: replace_sequencescape_sample_names.pl
-# ABSTRACT: Replace Sequencescape samples name with readable sample names
+# ABSTRACT: Replace Sequencescape sample names with readable sample names
 
 ## Author     : ian.sealy@sanger.ac.uk
 ## Maintainer : ian.sealy@sanger.ac.uk
