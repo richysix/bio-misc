@@ -52,20 +52,25 @@ foreach my $expt (@expts) {
     $expt_q =~ s/'\z/%'/xms;
     my $ary_ref = $dbh->selectall_arrayref(
         <<"SQL"
-        SELECT name, supplier_name
+        SELECT name, supplier_name, public_name
         FROM   current_samples
-        WHERE  (name LIKE $expt_q OR supplier_name LIKE $expt_q)
+        WHERE  (name LIKE $expt_q
+                OR supplier_name LIKE $expt_q
+                OR public_name LIKE $expt_q)
         AND    description NOT LIKE '%polyT%'
 SQL
     );
     my @samples;
     foreach ( @{$ary_ref} ) {
-        my ( $name, $supplier_name ) = @{$_};
+        my ( $name, $supplier_name, $public_name ) = @{$_};
         if ( $name =~ m/\A $expt [^[:alpha:]\d] /xms ) {
             push @samples, $name;
         }
         elsif ( $supplier_name =~ m/\A $expt [^[:alpha:]\d] /xms ) {
             push @samples, $supplier_name;
+        }
+        elsif ( $public_name =~ m/\A $expt [^[:alpha:]\d] /xms ) {
+            push @samples, $public_name;
         }
     }
 
