@@ -39,13 +39,19 @@ while ( my $line = <> ) {
     }
     push @avg_quals, $row_avg;
 }
-my $overall_avg = sum(@avg_quals) / scalar @avg_quals;
 if ( !$overall ) {
     foreach my $row_avg (@avg_quals) {
-        printf "%.1f\n", $row_avg;
+        if ( length $row_avg ) {
+            printf "%.1f\n", $row_avg;
+        }
+        else {
+            printf "\n";
+        }
     }
 }
 else {
+    @avg_quals = grep { length } @avg_quals;
+    my $overall_avg = sum(@avg_quals) / scalar @avg_quals;
     printf "%.1f\n", $overall_avg;
 }
 
