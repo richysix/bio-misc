@@ -51,8 +51,14 @@ if ( !$overall ) {
 }
 else {
     @avg_quals = grep { length } @avg_quals;
-    my $overall_avg = sum(@avg_quals) / scalar @avg_quals;
-    printf "%.1f\n", $overall_avg;
+    my $overall_avg = q{};
+    if ( scalar @avg_quals ) {
+        $overall_avg = sum(@avg_quals) / scalar @avg_quals;
+        printf "%.1f\n", $overall_avg;
+    }
+    else {
+        printf "\n";
+    }
 }
 
 # Get and check command line options
