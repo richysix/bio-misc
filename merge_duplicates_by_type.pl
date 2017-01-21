@@ -90,13 +90,16 @@ sub output {
                     push @values, $line->[ $i - 1 ];
                 }
             }
-            my $output_value = q{};
+            my $output_value = 0;
             if ( $is_sum{$i} || $is_mean{$i} ) {
                 foreach my $value (@values) {
                     $output_value += $value;
                 }
                 if ( $is_mean{$i} && scalar @values ) {
                     $output_value /= scalar @values;
+                }
+                elsif ( !scalar @values ) {
+                    $output_value = q{};
                 }
             }
             else {
