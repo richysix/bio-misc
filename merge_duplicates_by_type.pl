@@ -180,17 +180,17 @@ be specified.
 =head1 EXAMPLES
 
     perl \
-        merge_duplicates.pl \
+        merge_duplicates_by_type.pl \
         < input.tsv > output.tsv
 
     perl \
-        merge_duplicates.pl \
+        merge_duplicates_by_type.pl \
         --header --key 1 --sum 2 3 4 --mean 6 \
         < input.tsv > output.tsv
 
 =head1 USAGE
 
-    merge_duplicates.pl
+    merge_duplicates_by_type.pl
         [--key field...]
         [--sum field...]
         [--mean field...]
