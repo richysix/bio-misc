@@ -201,15 +201,17 @@ clusters <- unique(sort(data$cluster))
 # Make data like Mfuzz so as to use Mfuzz's plotting
 eset <- ExpressionSet(assayData=as.matrix(medianData))
 eset <- filter.std(eset, min.std=0, visu=FALSE)
+unfiltered <- as.integer(row.names(exprs(eset)))
 eset.s <- standardise(eset)
 cl <- list()
 cl[[1]] <- matrix(, nrow=hobj$clust$k, ncol=ncol(medianData))
-cl[[3]] <- as.integer(factor(data$cluster))
+cl[[3]] <- as.integer(factor(data$cluster))[unfiltered]
 cl[[4]] <- matrix(, nrow=nrow(medianData), ncol=0)
 for ( cluster in clusters ) {
     cl[[4]] <- cbind(cl[[4]],
                      matrix(as.integer(data$cluster == cluster), ncol=1))
 }
+cl[[4]] <- cl[[4]][unfiltered,]
 
 # Plot clusters
 pdf(paste0(outputBase, '-hopach.pdf'))
