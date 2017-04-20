@@ -57,6 +57,9 @@ countData <- data[,grepl(" count$", names(data)) &
                   !grepl(" normalised count$", names(data))]
 names(countData) <- gsub(" count$", "", names(countData))
 
+# Subset and reorder count data
+countData <- countData[, row.names(samples)]
+
 # Transform using DESeq2
 dds <- DESeqDataSetFromMatrix(countData, samples, design = ~ 1)
 dds <- estimateSizeFactors(dds)

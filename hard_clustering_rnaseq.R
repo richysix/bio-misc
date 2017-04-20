@@ -175,6 +175,9 @@ data[,1] <- factor(data[,1])
 countData <- data[,grepl(".normalised.counts?$", names(data))]
 names(countData) <- gsub(".normalised.counts?$", "", names(countData))
 
+# Subset and reorder count data
+countData <- countData[, row.names(samples)]
+
 # Get median counts
 medianData <- matrix(nrow=nrow(countData),
                      ncol=length(levels(samples$condition)),
@@ -219,20 +222,22 @@ write.table(hobj$clust$k, file=paste0(outputBase, '-num-clusters.tsv'),
             quote=FALSE, sep='\t', row.names=FALSE, col.names=FALSE)
 write.table(data, file=paste0(outputBase, '-clusters.tsv'),
             quote=FALSE, sep='\t', row.names=FALSE, col.names=TRUE)
-labels <- gsub(".normalised.*$", "",
-               names(data)[grepl(".normalised.*$", names(data))])
 colours <- as.numeric(samples$condition)
 for ( i in seq.int(length(clusters)) ) {
     data.subset <- data[data$cluster == clusters[i],]
     write.table(data.subset, file=paste0(outputBase, '-cluster-', i, '.tsv'),
                 quote=FALSE, sep='\t', row.names=FALSE, col.names=TRUE)
+    data.subset <- data.subset[,grepl(".normalised.counts?$", names(data.subset))]
+    names(data.subset) <- gsub(".normalised.counts?$", "", names(data.subset))
+    data.subset <- data.subset[, row.names(samples)]
     # Plot counts
     pdf(paste0(outputBase, '-cluster-', i, '-counts.pdf'))
     for (j in 1:nrow(data.subset)) {
-        counts <- data.subset[j, grepl(".normalised.*$", names(data.subset)) ]
+        counts <- data.subset[j,]
         par(mar=c(8.1, 4.1, 4.1, 2.1), xpd=TRUE)
         plot(as.numeric(counts), axes=FALSE, ann=FALSE, pch=21, bg=colours)
-        axis(1, at=1:length(labels), lab=labels, las=2, cex.axis=0.5)
+        axis(1, at=1:ncol(data.subset), lab=names(data.subset), las=2,
+             cex.axis=0.5)
         axis(2)
         title(main=sprintf("%s:%d-%d\n%s / %s\n%.2f",
                            data.subset[j,"Chr"], data.subset[j,"Start"],

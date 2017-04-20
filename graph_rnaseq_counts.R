@@ -22,19 +22,23 @@ names(data)[names(data) == 'adjpval'] <- 'adjp'
 # Read samples
 samples <- read.table( samplesFile, header=TRUE, row.names=1 )
 
+# Get counts
+countData <- data[,grepl(".normalised.*$", names(data))]
+names(countData) <- gsub(".normalised.*$", "", names(countData))
+
+# Subset and reorder count data
+countData <- countData[, row.names(samples)]
+
 # Graph parameters
-labels <- gsub(".normalised.*$", "",
-               names(data)[grepl(".normalised.*$", names(data))])
 colours <- as.numeric(samples$condition)
 
 pdf(pdfFile)
 
 # Plot each region separately
 for (i in 1:nrow(data)) {
-    counts <- data[i, grepl(".normalised.*$", names(data)) ]
     par(mar=c(8.1, 4.1, 4.1, 2.1), xpd=TRUE)
-    plot(as.numeric(counts), axes=FALSE, ann=FALSE, pch=21, bg=colours)
-    axis(1, at=1:length(labels), lab=labels, las=2, cex.axis=0.5)
+    plot(as.numeric(countData[i,]), axes=FALSE, ann=FALSE, pch=21, bg=colours)
+    axis(1, at=1:ncol(countData), lab=names(countData), las=2, cex.axis=0.5)
     axis(2)
     title(main=sprintf("%s:%d-%d\n%s / %s\n%.2f",
                        data[i,"Chr"], data[i,"Start"],
