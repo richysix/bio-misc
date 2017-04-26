@@ -36,6 +36,7 @@ countData <- countData[, row.names(samples)]
 
 # Graph parameters
 colours <- as.numeric(samples$condition)
+palette(rainbow(length(levels(samples$condition))))
 
 pdf(pdfFile)
 
