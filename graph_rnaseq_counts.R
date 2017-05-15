@@ -21,7 +21,7 @@ data <- read.delim(dataFile, header=TRUE, check.names=FALSE)
 names(data)[names(data) == 'chr']     <- 'Chr'
 names(data)[names(data) == 'start']   <- 'Start'
 names(data)[names(data) == 'end']     <- 'End'
-names(data)[names(data) == 'ID']      <- 'Gene.ID'
+names(data)[names(data) == 'ID']      <- 'Gene ID'
 names(data)[names(data) == 'adjpval'] <- 'adjp'
 
 # Read samples
@@ -49,7 +49,7 @@ if (plotStyle == "violin") {
                               data[,"Chr"],
                               data[,"Start"],
                               data[,"End"],
-                              data[,"Gene.ID"],
+                              data[,"Gene ID"],
                               data[,"Name"],
                               data[,"adjp"])
     levels(counts$condition) <- samples$condition
@@ -81,7 +81,7 @@ if (plotStyle == "violin") {
         axis(2)
         title(main=sprintf("%s:%d-%d\n%s / %s\n%.2f",
                            data[i,"Chr"], data[i,"Start"],
-                           data[i,"End"], data[i,"Gene.ID"],
+                           data[i,"End"], data[i,"Gene ID"],
                            data[i,"Name"], data[i,"adjp"]))
         title(xlab="")
         title(ylab="Normalised Counts")
