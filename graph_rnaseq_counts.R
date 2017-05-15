@@ -15,7 +15,7 @@ outputFile  <- ifelse(is.na(Args[8]), "counts.pdf",         Args[8])
 plotStyle   <- ifelse(is.na(Args[9]), "default",            Args[9])
 
 # Read data
-data <- read.delim(dataFile, header=TRUE)
+data <- read.delim(dataFile, header=TRUE, check.names=FALSE)
 
 # Support different column names
 names(data)[names(data) == 'chr']     <- 'Chr'
@@ -28,8 +28,8 @@ names(data)[names(data) == 'adjpval'] <- 'adjp'
 samples <- read.table( samplesFile, header=TRUE, row.names=1 )
 
 # Get counts
-countData <- data[,grepl(".normalised.*$", names(data))]
-names(countData) <- gsub(".normalised.*$", "", names(countData))
+countData <- data[,grepl(" normalised.*$", names(data))]
+names(countData) <- gsub(" normalised.*$", "", names(countData))
 
 # Subset and reorder count data
 countData <- countData[, row.names(samples)]
