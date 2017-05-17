@@ -204,6 +204,7 @@ EOF
     close $r_fh;
 
     # Run R script under LSF
+    printf "Running %s\n", "$dir/deseq2.R";
     my $cmd = <<"EOF";
 bsub -o $dir/deseq2.o -e $dir/deseq2.e -R'select[mem>4000] rusage[mem=4000]' -M4000 "Rscript $dir/deseq2.R"
 EOF
