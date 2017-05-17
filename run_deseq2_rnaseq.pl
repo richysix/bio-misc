@@ -199,6 +199,7 @@ heatmap.2(as.matrix(dist(t(assay(rld)))), trace="none", col = rev(hmcol), margin
 print(plotPCA(rld, intgroup=c("condition")))
 plotDispEsts(dds)
 dev.off()
+write.table(data.frame(), file="$dir.done", col.names=FALSE)
 quit()
 EOF
     close $r_fh;
