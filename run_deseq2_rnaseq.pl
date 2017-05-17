@@ -232,7 +232,7 @@ sub get_and_check_options {
 
     # Get options
     GetOptions(
-        'output_dir'              => \$output_dir,
+        'output_dir=s'            => \$output_dir,
         'counts_file=s'           => \$counts_file,
         'samples_file=s'          => \$samples_file,
         'comparisons=s@{,}'       => \@comparisons,
