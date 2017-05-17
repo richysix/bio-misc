@@ -21,9 +21,9 @@ use File::Spec;
 use File::Path qw( make_path );
 
 # Default options
-my $counts_file  = 'deseq2/counts.txt';
-my $samples_file = 'deseq2/samples.txt';
-my $output_dir   = 'deseq2';
+my $output_dir = 'deseq2';
+my $counts_file;
+my $samples_file;
 my @comparisons;
 my $remove_other_conditions;
 my ( $debug, $help, $man );
@@ -232,9 +232,9 @@ sub get_and_check_options {
 
     # Get options
     GetOptions(
+        'output_dir'              => \$output_dir,
         'counts_file=s'           => \$counts_file,
         'samples_file=s'          => \$samples_file,
-        'output_dir'              => \$output_dir,
         'comparisons=s@{,}'       => \@comparisons,
         'remove_other_conditions' => \$remove_other_conditions,
         'debug'                   => \$debug,
@@ -248,6 +248,13 @@ sub get_and_check_options {
     }
     elsif ($man) {
         pod2usage( -verbose => 2 );
+    }
+
+    if ( !$counts_file ) {
+        $counts_file = File::Spec->catfile( $output_dir, 'counts.txt' );
+    }
+    if ( !$samples_file ) {
+        $samples_file = File::Spec->catfile( $output_dir, 'samples.txt' );
     }
 
     return;
@@ -277,21 +284,21 @@ specified or all conditions.
 
     perl \
         run_deseq2_rnaseq.pl \
-        --counts_file counts.txt --samples_file samples.txt
+        --output_dir deseq2
 
     perl \
         run_deseq2_rnaseq.pl \
-        --counts_file counts.txt --samples_file samples.txt \
         --output_dir deseq2 \
+        --counts_file counts.txt --samples_file samples.txt \
         --comparisons hom:het hom:wt het:wt hom=mut:het,wt=sib \
         --remove_other_conditions
 
 =head1 USAGE
 
     convert_to_biolayout.pl
+        [--output_dir dir]
         [--counts_file file]
         [--samples_file file]
-        [--output_dir dir]
         [--comparisons comparison...]
         [--remove_other_conditions]
         [--debug]
@@ -302,6 +309,11 @@ specified or all conditions.
 
 =over 8
 
+=item B<--output_dir DIR>
+
+Directory in which to create output directories (and which should contain
+counts.txt and samples.txt if not specified explicitly).
+
 =item B<--counts_file FILE>
 
 RNA-Seq counts file (e.g. counts.txt).
@@ -310,10 +322,6 @@ RNA-Seq counts file (e.g. counts.txt).
 
 DESeq2 samples file (e.g. samples.txt). The order of samples in the samples file
 determines the order of the columns in the output.
-
-=item B<--output_dir DIR>
-
-Directory in which to create output directories.
 
 =item B<--comparisons COMPARISONS>
 
