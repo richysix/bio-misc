@@ -150,7 +150,9 @@ foreach my $comparison (@comparisons) {
         next if $remove_other_conditions && !exists $rename{$condition};
 
         printf {$samples_fh} "%s\t%s%s\n", $sample,
-          $rename{ $condition_for{$sample} },
+          exists $rename{ $condition_for{$sample} }
+          ? $rename{ $condition_for{$sample} }
+          : $condition_for{$sample},
           ( @all_groups ? "\t" . $group_for{$sample} : q{} );
     }
     close $samples_fh;
