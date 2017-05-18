@@ -26,6 +26,7 @@ my $counts_file;
 my $samples_file;
 my @comparisons;
 my $remove_other_conditions;
+my $interaction;
 my ( $debug, $help, $man );
 
 # Get and check command line options
@@ -138,6 +139,9 @@ foreach my $comparison (@comparisons) {
         $rename{$condition} = $con_name;
     }
     my $dir = File::Spec->catdir( $output_dir, $exp_name . '_vs_' . $con_name );
+    if ( $interaction && @all_groups ) {
+        $dir .= '-interaction';
+    }
     next if -e ( $dir . '.done' );
     make_path($dir);
 
@@ -174,6 +178,9 @@ foreach my $comparison (@comparisons) {
 
     # Write R script
     my $design = (@all_groups) ? 'group + condition' : 'condition';
+    if ( $interaction && @all_groups ) {
+        $design .= ' + group:condition';
+    }
     ## no critic (RequireBriefOpen)
     open my $r_fh, '>', File::Spec->catfile( $dir, 'deseq2.R' );
     ## use critic
@@ -239,6 +246,7 @@ sub get_and_check_options {
         'samples_file=s'          => \$samples_file,
         'comparisons=s@{,}'       => \@comparisons,
         'remove_other_conditions' => \$remove_other_conditions,
+        'interaction'             => \$interaction,
         'debug'                   => \$debug,
         'help'                    => \$help,
         'man'                     => \$man,
@@ -293,7 +301,8 @@ specified or all conditions.
         --output_dir deseq2 \
         --counts_file counts.txt --samples_file samples.txt \
         --comparisons hom:het hom:wt het:wt hom=mut:het,wt=sib \
-        --remove_other_conditions
+        --remove_other_conditions \
+        --interaction
 
 =head1 USAGE
 
@@ -303,6 +312,7 @@ specified or all conditions.
         [--samples_file file]
         [--comparisons comparison...]
         [--remove_other_conditions]
+        [--interaction]
         [--debug]
         [--help]
         [--man]
@@ -335,6 +345,10 @@ To rename a condition, append an equals sign (e.g. hom=mut:het,wt=sib).
 =item B<--remove_other_conditions>
 
 Remove other conditions from the counts file prior to running DESeq2.
+
+=item B<--interaction>
+
+Include an interaction term in multi-factor designs.
 
 =item B<--debug>
 
