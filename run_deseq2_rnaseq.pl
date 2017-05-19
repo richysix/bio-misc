@@ -234,7 +234,12 @@ sub get_common_prefix {
         $common_prefix_idx++;
     }
 
-    return substr $strings[0], 0, $common_prefix_idx;
+    my $common_prefix = substr $strings[0], 0, $common_prefix_idx;
+
+    # Hack to stop xx_het and xx_hom reducing to et and om
+    $common_prefix =~ s/_h \z/_/xms;
+
+    return $common_prefix;
 }
 
 # Get and check command line options
