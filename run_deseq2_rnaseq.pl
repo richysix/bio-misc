@@ -54,7 +54,8 @@ while ( my $line = <$samples_fh> ) {
 close $samples_fh;
 
 # Remove common prefix from conditions
-my $prefix = get_common_prefix( keys %is_condition );
+my $prefix =
+  scalar keys %is_condition > 1 ? get_common_prefix( keys %is_condition ) : q{};
 %is_condition = ();
 foreach my $sample ( keys %condition_for ) {
     $condition_for{$sample} =~ s/\A $prefix //xms;
