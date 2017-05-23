@@ -87,7 +87,8 @@ while (1) {
         chomp $line;
         my ( $gene, $count ) = split /\t/xms, $line;
         if ( defined $current_gene && $current_gene ne $gene ) {
-            confess 'Gene order inconsistent between files';
+            confess sprintf 'Gene order inconsistent between files (%s vs %s)',
+              $current_gene, $gene;
         }
         $current_gene = $gene;
         push @counts, $count;
