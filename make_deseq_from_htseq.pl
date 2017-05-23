@@ -67,7 +67,8 @@ my %fh_for;
 my @samples;
 foreach my $count_file (@count_files) {
     my ( undef, undef, $filename ) = File::Spec->splitpath($count_file);
-    my ($sample) = $filename =~ m/\A (.*) [.]count \z/xms;
+    my ($sample) = $filename =~ m/\A (.*) [.]count/xms;
+    confess sprintf q{Can't parse sample name from %s}, $filename if !$sample;
     if ( $sample =~ m/\A \d+STDY\d+ \z/xms ) {
         $sample = $name_for{$sample};
     }
