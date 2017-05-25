@@ -94,7 +94,7 @@ while (1) {
         $current_gene = $gene;
         push @counts, $count;
     }
-    last if $current_gene =~ m/\A _/xms;
+    last if $current_gene =~ m/\A _/xms || $current_gene =~ m/\A no_feature/xms;
     printf {$counts_fh} "%s\t%s\n", $current_gene, join "\t", @counts;
 }
 close $counts_fh;
