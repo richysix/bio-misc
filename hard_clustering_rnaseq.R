@@ -232,6 +232,9 @@ for ( i in seq.int(length(clusters)) ) {
     data.subset <- data.subset[,grepl(".normalised.counts?$", names(data.subset))]
     names(data.subset) <- gsub(".normalised.counts?$", "", names(data.subset))
     data.subset <- data.subset[, row.names(samples)]
+    if (nrow(data.subset) == 0) {
+        next
+    }
     # Plot counts
     pdf(paste0(outputBase, '-cluster-', i, '-counts.pdf'))
     for (j in 1:nrow(data.subset)) {
