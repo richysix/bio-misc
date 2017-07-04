@@ -66,8 +66,8 @@ if ( scalar @count_files == 1 ) {
 my %fh_for;
 my @samples;
 foreach my $count_file (@count_files) {
-    my @dirs   = File::Spec->splitdir($count_file);
-    my $sample = $dirs[-2];
+    my @dirs = File::Spec->splitdir($count_file);
+    my $sample = $dirs[-2];    ## no critic (ProhibitMagicNumbers)
     confess sprintf q{Can't parse sample name from %s}, $count_file if !$sample;
     if ( $sample =~ m/\A \d+STDY\d+ \z/xms ) {
         $sample = $name_for{$sample};
