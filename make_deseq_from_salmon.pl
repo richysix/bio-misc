@@ -66,9 +66,9 @@ if ( scalar @count_files == 1 ) {
 my %fh_for;
 my @samples;
 foreach my $count_file (@count_files) {
-    my ( undef, undef, $filename ) = File::Spec->splitpath($count_file);
-    my ($sample) = $filename =~ m/\A (.*) \/quant(.genes)?.sf/xms;
-    confess sprintf q{Can't parse sample name from %s}, $filename if !$sample;
+    my @dirs   = File::Spec->splitdir($count_file);
+    my $sample = $dirs[-1];
+    confess sprintf q{Can't parse sample name from %s}, $count_file if !$sample;
     if ( $sample =~ m/\A \d+STDY\d+ \z/xms ) {
         $sample = $name_for{$sample};
     }
