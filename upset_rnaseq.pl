@@ -32,6 +32,7 @@ foreach my $file (@input_files) {
     open my $fh, '<', $file;
     my $header = <$fh>;
     while ( my $line = <$fh> ) {
+        chomp $line;
         my @fields = split /\t/xms, $line;
         my $id = $fields[0];
         $upset{$id}{$set} = 1;
