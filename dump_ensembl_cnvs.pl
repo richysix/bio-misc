@@ -69,7 +69,7 @@ foreach my $slice ( sort { ncmp( $a->seq_region_name, $b->seq_region_name ) }
         sort {
                  $a->seq_region_start <=> $b->seq_region_start
               || $a->seq_region_end <=> $b->seq_region_end
-              || $a->variation_name <=> $b->variation_name
+              || $a->variation_name cmp $b->variation_name
         } @{$svs}
       )
     {
