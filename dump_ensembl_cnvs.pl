@@ -65,7 +65,13 @@ foreach my $slice ( sort { ncmp( $a->seq_region_name, $b->seq_region_name ) }
 
     # Get all structural variants
     my $svs = $slice->get_all_StructuralVariationFeatures();
-    foreach my $sv ( @{$svs} ) {
+    foreach my $sv (
+        sort {
+                 $a->seq_region_start <=> $b->seq_region_start
+              || $a->seq_region_end <=> $b->seq_region_end
+        } @{$svs}
+      )
+    {
         next if $sv->var_class ne 'CNV';
         my $strand = q{.};
         if ( $sv->seq_region_strand == -1 ) {
