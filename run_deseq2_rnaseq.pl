@@ -236,8 +236,9 @@ sub get_common_prefix {
 
     my $common_prefix = substr $strings[0], 0, $common_prefix_idx;
 
-    # Hack to stop xx_het and xx_hom reducing to et and om
+    # Hack to stop xx_het and xx_hom and het and hom reducing to et and om
     $common_prefix =~ s/_h \z/_/xms;
+    $common_prefix =~ s/\A h \z/_/xms;
 
     return $common_prefix;
 }
