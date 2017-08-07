@@ -87,11 +87,11 @@ if ( !@comparisons ) {
         confess "Only one condition (@all_conditions)";
     }
 
-    my ($wt)  = grep { m/(\b|_)wt \z/xms } @all_conditions;
-    my ($het) = grep { m/(\b|_)het \z/xms } @all_conditions;
-    my ($hom) = grep { m/(\b|_)hom \z/xms } @all_conditions;
-    my ($sib) = grep { m/(\b|_)sib \z/xms } @all_conditions;
-    my ($mut) = grep { m/(\b|_)mut \z/xms } @all_conditions;
+    my ($wt)  = grep { m/(\b|_)wt\b/xms } @all_conditions;
+    my ($het) = grep { m/(\b|_)het\b/xms } @all_conditions;
+    my ($hom) = grep { m/(\b|_)hom\b/xms } @all_conditions;
+    my ($sib) = grep { m/(\b|_)sib\b/xms } @all_conditions;
+    my ($mut) = grep { m/(\b|_)mut\b/xms } @all_conditions;
 
     if ( scalar @all_conditions == 2 ) {
         @comparisons =
