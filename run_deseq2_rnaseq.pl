@@ -238,7 +238,9 @@ sub get_common_prefix {
 
     # Hack to stop xx_het and xx_hom and het and hom reducing to et and om
     $common_prefix =~ s/_h \z/_/xms;
-    $common_prefix =~ s/\A h \z/_/xms;
+    if ( length $common_prefix == 1 ) {
+        $common_prefix = q{};
+    }
 
     return $common_prefix;
 }
