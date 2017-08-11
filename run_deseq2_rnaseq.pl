@@ -344,7 +344,7 @@ determines the order of the columns in the output.
 
 =item B<--comparisons COMPARISONS>
 
-Condition comparisons. Each comparison is a pair of exerpimental and controls
+Condition comparisons. Each comparison is a pair of experimental and controls
 conditions (in that order) separated by a colon (e.g. hom:wt). If multiple
 conditions are to be combined then separate them with a comma (e.g. hom:wt,het).
 To rename a condition, append an equals sign (e.g. hom=mut:het,wt=sib).
