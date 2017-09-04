@@ -36,18 +36,21 @@ get_and_check_options();
 my %condition_for;
 my %is_condition;
 my %group_for;
-my %is_group;
 my @all_samples;
 open my $samples_fh, '<', $samples_file;    ## no critic (RequireBriefOpen)
 my $header = <$samples_fh>;
+chomp $header;
+my ( undef, undef, @group_names ) = split /\t/xms, $header;
+
 while ( my $line = <$samples_fh> ) {
     chomp $line;
-    my ( $sample, $condition, $group ) = split /\t/xms, $line;
+    my ( $sample, $condition, @groups ) = split /\t/xms, $line;
     $condition_for{$sample}   = $condition;
     $is_condition{$condition} = 1;
-    if ($group) {
-        $group_for{$sample} = $group;
-        $is_group{$group}   = 1;
+    my $i = 0;
+    foreach my $group_name (@group_names) {
+        $group_for{$group_name}{$sample} = $groups[$i];
+        $i++;
     }
     push @all_samples, $sample;
 }
@@ -63,7 +66,6 @@ foreach my $sample ( keys %condition_for ) {
 }
 
 my @all_conditions = sort keys %is_condition;
-my @all_groups     = sort keys %is_group;
 
 # Get counts
 my @genes;
@@ -140,7 +142,7 @@ foreach my $comparison (@comparisons) {
         $rename{$condition} = $con_name;
     }
     my $dir = File::Spec->catdir( $output_dir, $exp_name . '_vs_' . $con_name );
-    if ( $interaction && @all_groups ) {
+    if ( $interaction && @group_names ) {
         $dir .= '-interaction';
     }
     next if -e ( $dir . '.done' );
@@ -149,17 +151,26 @@ foreach my $comparison (@comparisons) {
     # Write new samples file
     my $new_samples_file = File::Spec->catfile( $dir, 'samples.txt' );
     open $samples_fh, '>', $new_samples_file;    ## no critic (RequireBriefOpen)
-    printf {$samples_fh} "\tcondition%s\n", ( @all_groups ? "\tgroup" : q{} );
+    ## no critic (RequireCheckedSyscalls)
+    print {$samples_fh} "\tcondition";
+    foreach my $group_name (@group_names) {
+        print {$samples_fh} "\t" . $group_name;
+    }
+    print {$samples_fh} "\n";
     foreach my $sample (@all_samples) {
         my $condition = $condition_for{$sample};
         next if $remove_other_conditions && !exists $rename{$condition};
 
-        printf {$samples_fh} "%s\t%s%s\n", $sample,
+        printf {$samples_fh} "%s\t%s", $sample,
           exists $rename{ $condition_for{$sample} }
           ? $rename{ $condition_for{$sample} }
-          : $condition_for{$sample},
-          ( @all_groups ? "\t" . $group_for{$sample} : q{} );
+          : $condition_for{$sample};
+        foreach my $group_name (@group_names) {
+            print {$samples_fh} "\t" . $group_for{$group_name}{$sample};
+        }
+        print {$samples_fh} "\n";
     }
+    ## use critic
     close $samples_fh;
 
     # Write new counts file
@@ -178,9 +189,14 @@ foreach my $comparison (@comparisons) {
     close $counts_fh;
 
     # Write R script
-    my $design = (@all_groups) ? 'group + condition' : 'condition';
-    if ( $interaction && @all_groups ) {
-        $design .= ' + group:condition';
+    my $design = 'condition';
+    if (@group_names) {
+        $design = sprintf '%s + %s', ( join ' + ', @group_names ), $design;
+    }
+    if ( $interaction && @group_names ) {
+        foreach my $group_name (@group_names) {
+            $design .= sprintf ' + %s:condition', $group_name;
+        }
     }
     ## no critic (RequireBriefOpen)
     open my $r_fh, '>', File::Spec->catfile( $dir, 'deseq2.R' );
