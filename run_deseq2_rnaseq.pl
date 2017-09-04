@@ -95,22 +95,20 @@ if ( !@comparisons ) {
     my ($sib) = grep { m/(\b|_)sib \z/xms } @all_conditions;
     my ($mut) = grep { m/(\b|_)mut \z/xms } @all_conditions;
 
-    if ( scalar @all_conditions == 2 ) {
+    if ( $wt && $het && $hom ) {
+        push @comparisons, "$het:$wt";
+        push @comparisons, "$hom:$wt";
+        push @comparisons, "$hom:$het";
+        push @comparisons, "$hom:$het,$wt";
+        push @comparisons, "$hom,$het:$wt";
+    }
+    if ( !@comparisons ) {
         @comparisons =
             $wt  && $het ? ("$het:$wt")
           : $wt  && $hom ? ("$hom:$wt")
           : $het && $hom ? ("$hom:$het")
           : $sib && $mut ? ("$mut:$sib")
           :                ();
-    }
-    ## no critic (ProhibitMagicNumbers)
-    elsif ( scalar @all_conditions == 3 && $wt && $het && $hom ) {
-        ## use critic
-        push @comparisons, "$het:$wt";
-        push @comparisons, "$hom:$wt";
-        push @comparisons, "$hom:$het";
-        push @comparisons, "$hom:$het,$wt";
-        push @comparisons, "$hom,$het:$wt";
     }
 }
 
