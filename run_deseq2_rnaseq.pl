@@ -329,7 +329,7 @@ specified or all conditions.
 
 =head1 USAGE
 
-    convert_to_biolayout.pl
+    run_deseq2_rnaseq.pl
         [--output_dir dir]
         [--counts_file file]
         [--samples_file file]
