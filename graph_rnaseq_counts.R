@@ -8,11 +8,13 @@ library(ggplot2)
 library(reshape2)
 suppressPackageStartupMessages(library(dplyr))
 
-Args        <- commandArgs()
-dataFile    <- ifelse(is.na(Args[6]), "all.tsv",            Args[6])
-samplesFile <- ifelse(is.na(Args[7]), "deseq2/samples.txt", Args[7])
-outputFile  <- ifelse(is.na(Args[8]), "counts.pdf",         Args[8])
-plotStyle   <- ifelse(is.na(Args[9]), "default",            Args[9])
+Args           <- commandArgs()
+dataFile       <- ifelse(is.na(Args[6]), "all.tsv",            Args[6])
+samplesFile    <- ifelse(is.na(Args[7]), "deseq2/samples.txt", Args[7])
+outputFile     <- ifelse(is.na(Args[8]), "counts.pdf",         Args[8])
+plotStyle      <- ifelse(is.na(Args[9]), "default",            Args[9])
+shape          <- ifelse(is.na(Args[10]), "default",           Args[10])
+colourVariable <- ifelse(is.na(Args[11]), "stage",             Args[11])
 
 # Read data
 data <- read.delim(dataFile, header=TRUE, check.names=FALSE)
@@ -35,7 +37,19 @@ names(countData) <- gsub(" normalised.*$", "", names(countData))
 countData <- countData[, row.names(samples)]
 
 # Graph parameters
-colours <- as.numeric(samples$condition)
+shapePalette <- 21:25
+if (shape == 'default') { # don't use shape
+    colours <- as.numeric(samples$condition)
+    shapes <- rep(shapePalette[1], length(samples$condition))
+} else {
+    # check there aren't too many levels of condition for shape
+    if (nlevels(samples$condition) > length(shapePalette)) {
+        stop('The condition variable has more than levels than available shapes!')
+    } else {
+        shapes <- shapePalette[ as.numeric(samples$condition) ]
+        colours <- as.numeric(samples[[colourVariable]])
+    }
+}
 
 if (grepl("pdf$", outputFile)) {
     pdf(outputFile)
@@ -76,9 +90,13 @@ if (grepl("violin", plotStyle)) {
         if (!grepl("pdf$", outputFile)) {
             svg(paste0(outputFile, i, '.svg'))
         }
-        palette(rainbow(length(levels(samples$condition))))
+        if (shape == 'default') {
+            palette(rainbow(length(levels(samples$condition))))
+        } else {
+            palette(rainbow(length(levels(samples[[colourVariable]]))))
+        }
         par(mar=c(8.1, 4.1, 4.1, 2.1), xpd=TRUE)
-        plot(as.numeric(countData[i,]), axes=FALSE, ann=FALSE, pch=21,
+        plot(as.numeric(countData[i,]), axes=FALSE, ann=FALSE, pch=shapes,
              bg=colours)
         axis(1, at=1:ncol(countData), lab=names(countData), las=2, cex.axis=0.5)
         axis(2)
@@ -88,8 +106,15 @@ if (grepl("violin", plotStyle)) {
                            data[i,"Name"], data[i,"adjp"]))
         title(xlab="")
         title(ylab="Normalised Counts")
-        legend("topright", inset=c(0, -0.1), levels(samples$condition), pch=21,
-               pt.bg=1:length(levels(samples$condition)))
+
+        if (shape == 'default') {
+            legend("topright", inset=c(0, -0.1), levels(samples$condition), pch=21,
+                   pt.bg=1:length(levels(samples$condition)))            
+        } else {
+            legend("topright", inset=c(0, -0.1), levels(samples$condition), pch=shapePalette[ seq_len(nlevels(samples$condition)) ])
+            legend("right", inset=c(0, -0.1), levels(samples[[colourVariable]]), pch=21,
+                   pt.bg=1:length(levels(samples[[colourVariable]])))
+        }
         if (!grepl("pdf$", outputFile)) {
             graphics.off()
         }
