@@ -90,8 +90,8 @@ foreach my $bam_file (@bam_files) {
         if ( length $barcode < $tag_length ) {
             $random = substr $read1_seq, $random_start, $random_length,
               q{-} x $random_length;
-            $barcode .= substr $read1_seq, $inread_start, $inread_length,
-              q{-} x $inread_length;
+            $barcode = (substr $read1_seq, $inread_start, $inread_length,
+              q{-} x $inread_length) . $barcode;
             $read1_seq =~ s/\-//xmsg;
         }
         my $description  = q{};
