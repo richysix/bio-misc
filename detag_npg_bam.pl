@@ -83,6 +83,9 @@ foreach my $bam_file (@bam_files) {
         my $barcode   = $read1->aux_get('BC');
         my $random    = $read1->aux_get('br');
         my $read1_seq = $read1->query->dna;
+        ## no critic (ProhibitMagicNumbers)
+        my $read1_qual = join q{}, map { chr $_ + 33 } @{ $read1->qscore };
+        ## use critic
         confess sprintf
           'Got short barcode (%s) and random bases (%s) for read (%s)',
           $barcode, $random, $read1->qname
@@ -90,9 +93,16 @@ foreach my $bam_file (@bam_files) {
         if ( length $barcode < $tag_length ) {
             $random = substr $read1_seq, $random_start, $random_length,
               q{-} x $random_length;
-            $barcode = (substr $read1_seq, $inread_start, $inread_length,
-              q{-} x $inread_length) . $barcode;
+            $barcode = (
+                substr $read1_seq, $inread_start,
+                $inread_length,    q{-} x $inread_length,
+            ) . $barcode;
+            substr $read1_qual, $random_start, $random_length,
+              q{-} x $random_length;
+            substr $read1_qual, $inread_start, $inread_length,
+              q{-} x $inread_length;
             $read1_seq =~ s/\-//xmsg;
+            $read1_qual =~ s/\-//xmsg;
         }
         my $description  = q{};
         my $tf           = Text::Fuzzy->new( $barcode, max => $edit_distance );
@@ -110,10 +120,9 @@ foreach my $bam_file (@bam_files) {
         else {
             $nearest_tag = $nearest_tags[0];
         }
-        ## no critic (ProhibitMagicNumbers)
         printf { $fh_for{$nearest_tag}{1} } "@%s#%s/%d%s\n%s\n+\n%s\n",
-          $read1->qname, $random, 1, $description, $read1_seq, join q{},
-          map { chr $_ + 33 } @{ $read1->qscore };
+          $read1->qname, $random, 1, $description, $read1_seq, $read1_qual;
+        ## no critic (ProhibitMagicNumbers)
         printf { $fh_for{$nearest_tag}{2} } "@%s#%s/%d\n%s\n+\n%s\n",
           $read2->qname, $random, 2, $read2->query->dna, join q{},
           map { chr $_ + 33 } @{ $read2->qscore };
