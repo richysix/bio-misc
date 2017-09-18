@@ -9,12 +9,12 @@ library(reshape2)
 suppressPackageStartupMessages(library(dplyr))
 
 Args           <- commandArgs()
-dataFile       <- ifelse(is.na(Args[6]), "all.tsv",            Args[6])
-samplesFile    <- ifelse(is.na(Args[7]), "deseq2/samples.txt", Args[7])
-outputFile     <- ifelse(is.na(Args[8]), "counts.pdf",         Args[8])
-plotStyle      <- ifelse(is.na(Args[9]), "default",            Args[9])
-shape          <- ifelse(is.na(Args[10]), "default",           Args[10])
-colourVariable <- ifelse(is.na(Args[11]), "stage",             Args[11])
+dataFile       <- ifelse(is.na(Args[6]),  "all.tsv",            Args[6])
+samplesFile    <- ifelse(is.na(Args[7]),  "deseq2/samples.txt", Args[7])
+outputFile     <- ifelse(is.na(Args[8]),  "counts.pdf",         Args[8])
+plotStyle      <- ifelse(is.na(Args[9]),  "default",            Args[9])
+shapeVariable  <- ifelse(is.na(Args[10]), "none",               Args[10])
+colourVariable <- ifelse(is.na(Args[11]), "stage",              Args[11])
 
 # Read data
 data <- read.delim(dataFile, header=TRUE, check.names=FALSE)
@@ -29,6 +29,17 @@ names(data)[names(data) == 'adjpval'] <- 'adjp'
 # Read samples
 samples <- read.table( samplesFile, header=TRUE, row.names=1 )
 
+# check shape and colour variables exist in the samples file
+if (shapeVariable != 'none') {
+    if (!any(grepl(shapeVariable, colnames(samples)))) {
+        stop(paste0('The shape variable, ', shapeVariable, ' does not exist as a column in the samples file!'))
+    }
+    # check colourVariable as well
+    if (!any(grepl(colourVariable, colnames(samples)))) {
+        stop(paste0('The colour variable, ', colourVariable, ' does not exist as a column in the samples file!'))
+    }
+}
+
 # Get counts
 countData <- data[,grepl(" normalised.*$", names(data))]
 names(countData) <- gsub(" normalised.*$", "", names(countData))
@@ -38,15 +49,15 @@ countData <- countData[, row.names(samples)]
 
 # Graph parameters
 shapePalette <- 21:25
-if (shape == 'default') { # don't use shape
+if (shapeVariable == 'none') { # don't use shape
     colours <- as.numeric(samples$condition)
     shapes <- rep(shapePalette[1], length(samples$condition))
 } else {
     # check there aren't too many levels of condition for shape
-    if (nlevels(samples$condition) > length(shapePalette)) {
-        stop('The condition variable has more than levels than available shapes!')
+    if (nlevels(samples[[shapeVariable]]) > length(shapePalette)) {
+        stop(paste0('The shape variable, ', shapeVariable, ' has more levels than available shapes (5)!'))
     } else {
-        shapes <- shapePalette[ as.numeric(samples$condition) ]
+        shapes <- shapePalette[ as.numeric(samples[[shapeVariable]]) ]
         colours <- as.numeric(samples[[colourVariable]])
     }
 }
@@ -90,7 +101,7 @@ if (grepl("violin", plotStyle)) {
         if (!grepl("pdf$", outputFile)) {
             svg(paste0(outputFile, i, '.svg'))
         }
-        if (shape == 'default') {
+        if (shapeVariable == 'none') {
             palette(rainbow(length(levels(samples$condition))))
         } else {
             palette(rainbow(length(levels(samples[[colourVariable]]))))
@@ -107,11 +118,11 @@ if (grepl("violin", plotStyle)) {
         title(xlab="")
         title(ylab="Normalised Counts")
 
-        if (shape == 'default') {
+        if (shapeVariable == 'none') {
             legend("topright", inset=c(0, -0.1), levels(samples$condition), pch=21,
                    pt.bg=1:length(levels(samples$condition)))            
         } else {
-            legend("topright", inset=c(0, -0.1), levels(samples$condition), pch=shapePalette[ seq_len(nlevels(samples$condition)) ])
+            legend("topright", inset=c(0, -0.1), levels(samples[[shapeVariable]]), pch=shapePalette[ seq_len(nlevels(samples[[shapeVariable]])) ])
             legend("right", inset=c(0, -0.1), levels(samples[[colourVariable]]), pch=21,
                    pt.bg=1:length(levels(samples[[colourVariable]])))
         }
