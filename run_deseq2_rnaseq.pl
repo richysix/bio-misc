@@ -86,7 +86,7 @@ while ( my $line = <$counts_fh> ) {
 # Assume some comparisons
 if ( !@comparisons ) {
     if ( scalar @all_conditions == 1 ) {
-        confess "Only one condition (@all_conditions)";
+        confess "Only one condition (@all_conditions) for $output_dir";
     }
 
     my ($wt)  = grep { m/(\b|_)wt \z/xms } @all_conditions;
@@ -114,8 +114,10 @@ if ( !@comparisons ) {
 
 foreach my $comparison (@comparisons) {
     my ( $all_exp, $all_con ) = split /:/xms, $comparison;
-    confess "Experimental condition missing from $comparison" if !$all_exp;
-    confess "Control condition missing from $comparison"      if !$all_con;
+    confess "Experimental condition missing from $comparison for $output_dir"
+      if !$all_exp;
+    confess "Control condition missing from $comparison for $output_dir"
+      if !$all_con;
     my ( $exp, $exp_name ) = split /=/xms, $all_exp;
     my ( $con, $con_name ) = split /=/xms, $all_con;
     if ( !$exp_name ) {
@@ -130,12 +132,12 @@ foreach my $comparison (@comparisons) {
     my @con = split /,/xms, $con;
     my %rename;
     foreach my $condition (@exp) {
-        confess "Unknown condition ($condition) in $comparison"
+        confess "Unknown condition ($condition) in $comparison for $output_dir"
           if !$is_condition{$condition};
         $rename{$condition} = $exp_name;
     }
     foreach my $condition (@con) {
-        confess "Unknown condition ($condition) in $comparison"
+        confess "Unknown condition ($condition) in $comparison for $output_dir"
           if !$is_condition{$condition};
         $rename{$condition} = $con_name;
     }
