@@ -14,16 +14,7 @@ samples   <- read.table( samplesFile, header=TRUE, row.names=1 )
 
 # Normalise
 dds <- DESeqDataSetFromMatrix(countData, samples, design = ~ 1)
-if ( all(is.infinite(rowMeans(log(counts(dds))))) ) {
-    # Every gene contains at least one zero, so mimic "poscounts" method
-    geoMeanNZ <- function(x) {
-        if (all(x == 0)) { 0 } else { exp( sum(log(x[x > 0])) / length(x) ) }
-    }
-    geoMeans <- apply(counts(dds), 1, geoMeanNZ)
-    dds <- estimateSizeFactors(dds, geoMeans=geoMeans)
-} else {
-    dds <- estimateSizeFactors(dds)
-}
+dds <- estimateSizeFactors(dds)
 
 # Write out normalisation size factors
 write.table(sizeFactors(dds),
