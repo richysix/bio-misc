@@ -54,6 +54,7 @@ while ( my $line = <> ) {
         $gene_id, $transcript_id, $exon_id, $exon_ordinal
       ];
 }
+print_exons( \@exons );
 
 # Parse attributes field and extract specific types
 sub parse_attributes {
