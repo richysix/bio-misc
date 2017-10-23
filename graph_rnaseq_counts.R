@@ -29,14 +29,16 @@ names(data)[names(data) == 'adjpval'] <- 'adjp'
 # Read samples
 samples <- read.table( samplesFile, header=TRUE, row.names=1 )
 
-# check shape and colour variables exist in the samples file
+# Check shape and colour variables exist in the samples file
 if (shapeVariable != 'none') {
     if (!any(grepl(shapeVariable, colnames(samples)))) {
-        stop(paste0('The shape variable, ', shapeVariable, ' does not exist as a column in the samples file!'))
+        stop(paste0('The shape variable, ', shapeVariable,
+                    ' does not exist as a column in the samples file'))
     }
-    # check colourVariable as well
+    # Check colourVariable as well
     if (!any(grepl(colourVariable, colnames(samples)))) {
-        stop(paste0('The colour variable, ', colourVariable, ' does not exist as a column in the samples file!'))
+        stop(paste0('The colour variable, ', colourVariable,
+                    ' does not exist as a column in the samples file'))
     }
 }
 
@@ -49,13 +51,15 @@ countData <- countData[, row.names(samples)]
 
 # Graph parameters
 shapePalette <- 21:25
-if (shapeVariable == 'none') { # don't use shape
+if (shapeVariable == 'none') { # Don't use shape
     colours <- as.numeric(samples$condition)
     shapes <- rep(shapePalette[1], length(samples$condition))
 } else {
-    # check there aren't too many levels of condition for shape
+    # Check there aren't too many levels of condition for shape
     if (nlevels(samples[[shapeVariable]]) > length(shapePalette)) {
-        stop(paste0('The shape variable, ', shapeVariable, ' has more levels than available shapes (5)!'))
+        stop(paste0('The shape variable, ', shapeVariable,
+                    ' has more levels than available shapes (',
+                    length(samples$condition), ')'))
     } else {
         shapes <- shapePalette[ as.numeric(samples[[shapeVariable]]) ]
         colours <- as.numeric(samples[[colourVariable]])
@@ -119,12 +123,14 @@ if (grepl("violin", plotStyle)) {
         title(ylab="Normalised Counts")
 
         if (shapeVariable == 'none') {
-            legend("topright", inset=c(0, -0.1), levels(samples$condition), pch=21,
-                   pt.bg=1:length(levels(samples$condition)))            
+            legend("topright", inset=c(0, -0.1), levels(samples$condition),
+                   pch=21, pt.bg=1:length(levels(samples$condition)))
         } else {
-            legend("topright", inset=c(0, -0.1), levels(samples[[shapeVariable]]), pch=shapePalette[ seq_len(nlevels(samples[[shapeVariable]])) ])
-            legend("right", inset=c(0, -0.1), levels(samples[[colourVariable]]), pch=21,
-                   pt.bg=1:length(levels(samples[[colourVariable]])))
+            legend("topright", inset=c(0, -0.1),
+                   levels(samples[[shapeVariable]]),
+                   pch=shapePalette[ seq_len(nlevels(samples[[shapeVariable]])) ])
+            legend("right", inset=c(0, -0.1), levels(samples[[colourVariable]]),
+                   pch=21, pt.bg=1:length(levels(samples[[colourVariable]])))
         }
         if (!grepl("pdf$", outputFile)) {
             graphics.off()
