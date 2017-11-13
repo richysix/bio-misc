@@ -235,7 +235,7 @@ use with GSEA.
 
 =head1 USAGE
 
-    run_deseq2_rnaseq.pl
+    convert_deseq2_to_gsea.pl
         [--dir dir]
         [--all_file file]
         [--samples_file file]
