@@ -89,7 +89,7 @@ my @classes = map { $condition_for{$_} eq $exp_condition ? 0 : 1 } @samples;
 printf {$samples_fh} "%s\n", ( join q{ }, @classes );
 close $samples_fh;
 
-# Get headings, normalised counts and adjusted p-values
+# Get headings, normalised counts and log2 fold change
 open my $all_fh, '<', $all_file;    ## no critic (RequireBriefOpen)
 $header = <$all_fh>;
 chomp $header;
@@ -105,7 +105,7 @@ foreach my $heading (@headings) {
 }
 my @genes;
 my %counts_for;
-my %pval_for;
+my %l2fc_for;
 while ( my $line = <$all_fh> ) {
     chomp $line;
     my @fields = split /\t/xms, $line;
@@ -114,13 +114,13 @@ while ( my $line = <$all_fh> ) {
     foreach my $sample (@samples) {
         push @{ $counts_for{$sample} }, $fields[ $sample_to_col{$sample} ];
     }
-    $pval_for{ $fields[0] } = $fields[2];
+    $l2fc_for{ $fields[0] } = $fields[3];    ## no critic (ProhibitMagicNumbers)
 }
 close $all_fh;
 
 # Write GCT file
 my $gct_file = File::Spec->catfile( $dir, 'counts.gct' );
-open my $gct_fh, '>', $gct_file;    ## no critic (RequireBriefOpen)
+open my $gct_fh, '>', $gct_file;             ## no critic (RequireBriefOpen)
 printf {$gct_fh} "%s\n", '#1.2';
 printf {$gct_fh} "%d\t%d\n", scalar @genes, scalar @samples;
 printf {$gct_fh} "NAME\tDescription\t%s\n", ( join "\t", @samples );
@@ -137,7 +137,7 @@ close $gct_fh;
 my $rnk_file = File::Spec->catfile( $dir, 'genes.rnk' );
 open my $rnk_fh, '>', $rnk_file;
 foreach my $gene (@genes) {
-    printf {$rnk_fh} "%s\t%s\n", $gene, $pval_for{$gene};
+    printf {$rnk_fh} "%s\t%s\n", $gene, $l2fc_for{$gene};
 }
 close $rnk_fh;
 
