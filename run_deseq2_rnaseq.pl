@@ -176,7 +176,13 @@ foreach my $comparison (@comparisons) {
     # Write new counts file
     my $new_counts_file = File::Spec->catfile( $dir, 'counts.txt' );
     open $counts_fh, '>', $new_counts_file;    ## no critic (RequireBriefOpen)
-    printf {$counts_fh} "\t%s\n", ( join "\t", @all_samples );
+    my @header_samples;
+    foreach my $sample (@all_samples) {
+        my $condition = $condition_for{$sample};
+        next if $remove_other_conditions && !exists $rename{$condition};
+        push @header_samples, $sample;
+    }
+    printf {$counts_fh} "\t%s\n", ( join "\t", @header_samples );
     foreach my $i ( 0 .. ( scalar @genes ) - 1 ) {
         my @counts;
         foreach my $sample (@all_samples) {
