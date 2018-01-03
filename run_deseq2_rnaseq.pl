@@ -28,6 +28,7 @@ my @comparisons;
 my $remove_other_conditions;
 my $interaction;
 my $lfc_threshold = 0;
+my $memory        = 4000;    ## no critic (ProhibitMagicNumbers)
 my ( $debug, $help, $man );
 
 # Get and check command line options
@@ -240,7 +241,7 @@ EOF
     # Run R script under LSF
     printf "Running %s\n", "$dir/deseq2.R";
     my $cmd = <<"EOF";
-bsub -o $dir/deseq2.o -e $dir/deseq2.e -R'select[mem>4000] rusage[mem=4000]' -M4000 "Rscript $dir/deseq2.R"
+bsub -o $dir/deseq2.o -e $dir/deseq2.e -R'select[mem>$memory] rusage[mem=$memory]' -M$memory "Rscript $dir/deseq2.R"
 EOF
     WIFEXITED( system $cmd) or confess "Couldn't run $cmd ($OS_ERROR)";
 }
@@ -280,6 +281,7 @@ sub get_and_check_options {
         'remove_other_conditions' => \$remove_other_conditions,
         'interaction'             => \$interaction,
         'lfc_threshold=i'         => \$lfc_threshold,
+        'memory=i'                => \$memory,
         'debug'                   => \$debug,
         'help'                    => \$help,
         'man'                     => \$man,
@@ -336,7 +338,8 @@ specified or all conditions.
         --comparisons hom:het hom:wt het:wt hom=mut:het,wt=sib \
         --remove_other_conditions \
         --interaction \
-        --lfc_threshold 1
+        --lfc_threshold 1 \
+        --memory 8000
 
 =head1 USAGE
 
@@ -388,6 +391,10 @@ Include an interaction term in multi-factor designs.
 =item B<--lfc_threshold>
 
 Log2 fold change threshold for significance.
+
+=item B<--memory>
+
+Memory to allocate for each LSF job.
 
 =item B<--debug>
 
