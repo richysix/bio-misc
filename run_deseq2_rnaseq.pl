@@ -39,6 +39,7 @@ my %condition_for;
 my %is_condition;
 my %group_for;
 my @all_samples;
+my %is_sample;
 open my $samples_fh, '<', $samples_file;    ## no critic (RequireBriefOpen)
 my $header = <$samples_fh>;
 chomp $header;
@@ -55,6 +56,7 @@ while ( my $line = <$samples_fh> ) {
         $i++;
     }
     push @all_samples, $sample;
+    $is_sample{$sample} = 1;
 }
 close $samples_fh;
 
@@ -81,6 +83,7 @@ while ( my $line = <$counts_fh> ) {
     my ( $gene, @counts ) = split /\t/xms, $line;
     push @genes, $gene;
     foreach my $i ( 0 .. ( scalar @count_samples ) - 1 ) {
+        next if !$is_sample{ $count_samples[$i] };
         push @{ $counts_for{ $count_samples[$i] } }, $counts[$i];
     }
 }
