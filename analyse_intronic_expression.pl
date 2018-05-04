@@ -335,6 +335,7 @@ sub load_repeats {
     $header = <$fh>;
     while ( my $line = <$fh> ) {
         chomp $line;
+        $line =~ s/\A \s+//xms;        # Remove leading space
         my @fields = split /\s+/xms, $line;
         ## no critic (ProhibitMagicNumbers)
         next if $fields[4] ne $chr;
