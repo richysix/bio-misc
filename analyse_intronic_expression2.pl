@@ -1,0 +1,177 @@
+#!/usr/bin/env perl
+
+# PODNAME: analyse_intronic_expression2.pl
+# ABSTRACT: Analyse intronic expression (part 2)
+
+## Author     : ian.sealy@sanger.ac.uk
+## Maintainer : ian.sealy@sanger.ac.uk
+## Created    : 2018-03-22
+
+use warnings;
+use strict;
+use autodie;
+use Getopt::Long;
+use Pod::Usage;
+use Carp;
+use version; our $VERSION = qv('v0.1.0');
+
+use Readonly;
+
+# Constants
+Readonly our $COUNT_THRESHOLD => 10;
+
+# Default options
+my ( $debug, $help, $man );
+
+# Iterate over STDIN
+my $header = <>;
+chomp $header;
+printf "%s\n", join "\t", $header,
+  "Intron Segment Enclosed Total Count > $COUNT_THRESHOLD",
+  "Prev Exon Overlap Count & Next Exon Overlap Count > $COUNT_THRESHOLD",
+  "Repeat Overlap Total Count > $COUNT_THRESHOLD",
+  'Category';
+while ( my $line = <> ) {
+    chomp $line;
+    if ( $line =~ m/\A [#]/xms ) {
+        printf "%s\n", $line;
+        next;
+    }
+    my @fields = split /\t/xms, $line;
+    ## no critic (ProhibitMagicNumbers)
+    my $counts_in_intron =
+      $fields[31] eq q{-} ? q{-} : $fields[31] > $COUNT_THRESHOLD ? q{y} : q{n};
+    my $counts_in_exons = $fields[15] > $COUNT_THRESHOLD
+      && $fields[20] > $COUNT_THRESHOLD ? q{y} : q{n};
+    my $counts_in_repeats =
+      $fields[26] eq q{-} ? q{-} : $fields[26] > $COUNT_THRESHOLD ? q{y} : q{n};
+    ## use critic
+    my $category;
+    if ( $counts_in_intron eq q{-} ) {
+        $category = 'intron-entirely-repeat';
+    }
+    elsif ( $counts_in_intron eq q{y} && $counts_in_exons eq q{y} ) {
+        $category =
+          $counts_in_repeats eq q{y}
+          ? 'repeats-not-expressed-independently'
+          : 'novel-exon-or-intron-retention';
+    }
+    elsif ( $counts_in_intron eq q{y} && $counts_in_exons eq q{n} ) {
+        $category =
+          $counts_in_repeats eq q{y}
+          ? 'repeats-expressed-independently'
+          : 'novel-exon-or-intron-retention';
+    }
+    elsif ( $counts_in_intron eq q{n} && $counts_in_exons eq q{y} ) {
+        $category =
+          $counts_in_repeats eq q{y}
+          ? 'repeats-expressed-independently'
+          : 'only-exons-expressed';
+    }
+    elsif ( $counts_in_intron eq q{n} && $counts_in_exons eq q{n} ) {
+        $category =
+          $counts_in_repeats eq q{y}
+          ? 'repeats-expressed-independently'
+          : 'transcriptionally-silent';
+    }
+    printf "%s\n", join "\t", $line, $counts_in_intron, $counts_in_exons,
+      $counts_in_repeats, $category;
+}
+
+# Get and check command line options
+get_and_check_options();
+
+# Get and check command line options
+sub get_and_check_options {
+
+    # Get options
+    GetOptions(
+        'debug' => \$debug,
+        'help'  => \$help,
+        'man'   => \$man,
+    ) or pod2usage(2);
+
+    # Documentation
+    if ($help) {
+        pod2usage(1);
+    }
+    elsif ($man) {
+        pod2usage( -verbose => 2 );
+    }
+
+    return;
+}
+
+__END__
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+analyse_intronic_expression2.pl
+
+Analyse intronic expression (part 2)
+
+=head1 VERSION
+
+version 0.1.0
+
+=head1 DESCRIPTION
+
+This script analyses the output from the previous intronic expression analysis
+script.
+
+=head1 EXAMPLES
+
+    perl analyse_intronic_expression2.pl \
+        < input.txt > output.txt
+
+=head1 USAGE
+
+    analyse_intronic_expression2.pl
+        [--debug]
+        [--help]
+        [--man]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<--debug>
+
+Print debugging information.
+
+=item B<--help>
+
+Print a brief help message and exit.
+
+=item B<--man>
+
+Print this script's manual page and exit.
+
+=back
+
+=head1 DEPENDENCIES
+
+None
+
+=head1 AUTHOR
+
+=over 4
+
+=item *
+
+Ian Sealy <ian.sealy@sanger.ac.uk>
+
+=back
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is Copyright (c) 2018 by Genome Research Ltd.
+
+This is free software, licensed under:
+
+  The GNU General Public License, Version 3, June 2007
+
+=cut
