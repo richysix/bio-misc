@@ -23,6 +23,9 @@ Readonly our $COUNT_THRESHOLD => 10;
 # Default options
 my ( $debug, $help, $man );
 
+# Get and check command line options
+get_and_check_options();
+
 # Iterate over STDIN
 my $header = <>;
 chomp $header;
