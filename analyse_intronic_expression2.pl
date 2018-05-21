@@ -51,16 +51,13 @@ while ( my $line = <> ) {
         $category = 'intron-entirely-repeat';
     }
     elsif ( $counts_in_intron eq q{y} && $counts_in_exons eq q{y} ) {
-        $category =
-          $counts_in_repeats eq q{y}
-          ? 'repeats-not-expressed-independently'
-          : 'novel-exon-or-intron-retention';
+        $category = 'novel-exon-or-intron-retention';
     }
     elsif ( $counts_in_intron eq q{y} && $counts_in_exons eq q{n} ) {
         $category =
           $counts_in_repeats eq q{y}
           ? 'repeats-expressed-independently'
-          : 'novel-exon-or-intron-retention';
+          : 'novel-exon';
     }
     elsif ( $counts_in_intron eq q{n} && $counts_in_exons eq q{y} ) {
         $category =
