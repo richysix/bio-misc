@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # PODNAME: analyse_intronic_expression2.pl
-# ABSTRACT: Analyse intronic expression (part 2)
+# ABSTRACT: Analyse intronic expression (part 2) - decision tree
 
 ## Author     : ian.sealy@sanger.ac.uk
 ## Maintainer : ian.sealy@sanger.ac.uk
@@ -111,7 +111,7 @@ __END__
 
 analyse_intronic_expression2.pl
 
-Analyse intronic expression (part 2)
+Analyse intronic expression (part 2) - decision tree
 
 =head1 VERSION
 
@@ -120,7 +120,7 @@ version 0.1.0
 =head1 DESCRIPTION
 
 This script analyses the output from the previous intronic expression analysis
-script.
+script to incorporate decision tree information.
 
 =head1 EXAMPLES
 
