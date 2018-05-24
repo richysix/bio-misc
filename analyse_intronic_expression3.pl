@@ -93,9 +93,6 @@ while ( my $line = <$fh> ) {
 close $fh;
 
 # Get and check command line options
-get_and_check_options();
-
-# Get and check command line options
 sub get_and_check_options {
 
     # Get options
