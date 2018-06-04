@@ -219,8 +219,6 @@ foreach my $slice ( sort { ncmp( $a->seq_region_name, $b->seq_region_name ) }
                       count_overlapping( $hts, $slice->seq_region_name,
                         $repeat->[0], $repeat->[1], $intron->seq_region_strand,
                         $total_count );
-                    $repeat_total_count += $repeat_count;
-                    $repeat_total_fpkm  += $repeat_fpkm;
                     push @repeat_counts, $repeat_count;
                     push @repeat_fpkms,  $repeat_fpkm;
                     push @repeat_names,  $repeat->[2];
@@ -239,8 +237,6 @@ foreach my $slice ( sort { ncmp( $a->seq_region_name, $b->seq_region_name ) }
                             $intron->seq_region_strand,
                             $total_count
                           );
-                        $intron_segment_total_count += $intron_segment_count;
-                        $intron_segment_total_fpkm  += $intron_segment_fpkm;
                         push @intron_segment_counts, $intron_segment_count;
                         push @intron_segment_fpkms,  $intron_segment_fpkm;
                         push @intron_segment_coords,
@@ -259,13 +255,29 @@ foreach my $slice ( sort { ncmp( $a->seq_region_name, $b->seq_region_name ) }
                         $intron_segment_start,      $intron_segment_end,
                         $intron->seq_region_strand, $total_count
                       );
-                    $intron_segment_total_count += $intron_segment_count;
-                    $intron_segment_total_fpkm  += $intron_segment_fpkm;
                     push @intron_segment_counts, $intron_segment_count;
                     push @intron_segment_fpkms,  $intron_segment_fpkm;
                     push @intron_segment_coords,
                       $intron_segment_start . q{-} . $intron_segment_end;
                 }
+
+                # Get totals
+                if ( @{$repeats} ) {
+                    my @repeat_pairs = map { [ $_->[0], $_->[1] ] } @{$repeats};
+                    ( $repeat_total_count, $repeat_total_fpkm ) =
+                      count_overlapping_multiple( $hts,
+                        $slice->seq_region_name, \@repeat_pairs,
+                        $intron->seq_region_strand, $total_count );
+                }
+                if (@intron_segment_coords) {
+                    my @intron_segment_pairs =
+                      map { [ split /-/xms ] } @intron_segment_coords;
+                    ( $intron_segment_total_count, $intron_segment_total_fpkm )
+                      = count_enclosed_multiple( $hts, $slice->seq_region_name,
+                        \@intron_segment_pairs, $intron->seq_region_strand,
+                        $total_count );
+                }
+
                 $intron_segment_total_count =
                   @intron_segment_counts ? $intron_segment_total_count : q{-};
                 $intron_segment_total_fpkm =
@@ -491,6 +503,115 @@ sub count_enclosed {    ## no critic (ProhibitManyArgs)
     # Also return FPKM
     if ( !$length ) {
         $length = $region_end - $region_start + 1;
+    }
+    return ( $count, $count / ( $total_count / 1e6 ) / $length * 1000 );
+}
+
+# Count read pairs where one read overlaps any of a number of stranded regions
+sub count_overlapping_multiple {    ## no critic (ProhibitManyArgs)
+    ## no critic (ProhibitReusedNames)
+    my ( $hts, $region_chr, $region_pairs, $region_strand, $total_count,
+        $length )
+      = @_;
+    ## use critic
+
+    my %ignore;
+    my $count = 0;
+    foreach my $region_pair ( @{$region_pairs} ) {
+        my ( $region_start, $region_end ) = @{$region_pair};
+        confess sprintf 'Region %s:%d-%d:%d malformed', $region_chr,
+          $region_start, $region_end, $region_strand
+          if $region_start > $region_end;
+
+        my $alignments = $hts->features(
+            -seq_id   => $region_chr,
+            -start    => $region_start,
+            -end      => $region_end,
+            -iterator => 1,
+        );
+        while ( my $alignment = $alignments->next_seq ) {
+            next if $alignment->get_tag_values('FLAGS') =~ m/\bDUPLICATE\b/xms;
+            next if $alignment->qual < $MAPQ_THRESHOLD;
+            next
+              if $alignment->get_tag_values('FLAGS') =~ m/\bFIRST_MATE\b/xms
+              && $alignment->strand == $region_strand;
+            next
+              if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
+              && $alignment->strand != $region_strand;
+            next
+              if exists $ignore{ $alignment->qname };
+            if ( !$alignment->munmapped ) {
+                $ignore{ $alignment->qname } = 1;
+            }
+            $count++;
+        }
+    }
+
+    return $count if !$total_count;
+
+    # Also return FPKM
+    if ( !$length ) {
+        $length = 0;
+        foreach my $region_pair ( @{$region_pairs} ) {
+            my ( $region_start, $region_end ) = @{$region_pair};
+            $length += $region_end - $region_start + 1;
+        }
+    }
+    return ( $count, $count / ( $total_count / 1e6 ) / $length * 1000 );
+}
+
+# Count read pairs where one read is entirely enclosed in one of a number of
+# stranded regions
+sub count_enclosed_multiple {    ## no critic (ProhibitManyArgs)
+    ## no critic (ProhibitReusedNames)
+    my ( $hts, $region_chr, $region_pairs, $region_strand, $total_count,
+        $length )
+      = @_;
+    ## use critic
+
+    my %ignore;
+    my $count = 0;
+    foreach my $region_pair ( @{$region_pairs} ) {
+        my ( $region_start, $region_end ) = @{$region_pair};
+        confess sprintf 'Region %s:%d-%d:%d malformed', $region_chr,
+          $region_start, $region_end, $region_strand
+          if $region_start > $region_end;
+
+        my $alignments = $hts->features(
+            -seq_id   => $region_chr,
+            -start    => $region_start,
+            -end      => $region_end,
+            -iterator => 1,
+        );
+        while ( my $alignment = $alignments->next_seq ) {
+            next if $alignment->start < $region_start;
+            next if $alignment->end > $region_end;
+            next if $alignment->get_tag_values('FLAGS') =~ m/\bDUPLICATE\b/xms;
+            next if $alignment->qual < $MAPQ_THRESHOLD;
+            next
+              if $alignment->get_tag_values('FLAGS') =~ m/\bFIRST_MATE\b/xms
+              && $alignment->strand == $region_strand;
+            next
+              if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
+              && $alignment->strand != $region_strand;
+            next
+              if exists $ignore{ $alignment->qname };
+            if ( !$alignment->munmapped ) {
+                $ignore{ $alignment->qname } = 1;
+            }
+            $count++;
+        }
+    }
+
+    return $count if !$total_count;
+
+    # Also return FPKM
+    if ( !$length ) {
+        $length = 0;
+        foreach my $region_pair ( @{$region_pairs} ) {
+            my ( $region_start, $region_end ) = @{$region_pair};
+            $length += $region_end - $region_start + 1;
+        }
     }
     return ( $count, $count / ( $total_count / 1e6 ) / $length * 1000 );
 }
