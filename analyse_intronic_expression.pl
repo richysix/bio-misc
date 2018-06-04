@@ -444,7 +444,7 @@ sub count_overlapping {    ## no critic (ProhibitManyArgs)
     if ( !$length ) {
         $length = $region_end - $region_start + 1;
     }
-    return ( $count, $count / ( $total_count / 1e6 ) / $length );
+    return ( $count, $count / ( $total_count / 1e6 ) / $length * 1000 );
 }
 
 # Count read pairs where one read is entirely enclosed in a stranded region
@@ -492,7 +492,7 @@ sub count_enclosed {    ## no critic (ProhibitManyArgs)
     if ( !$length ) {
         $length = $region_end - $region_start + 1;
     }
-    return ( $count, $count / ( $total_count / 1e6 ) / $length );
+    return ( $count, $count / ( $total_count / 1e6 ) / $length * 1000 );
 }
 
 # Get and check command line options
