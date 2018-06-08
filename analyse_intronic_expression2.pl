@@ -48,15 +48,15 @@ while ( my $line = <> ) {
     my @fields = split /\t/xms, $line;
     ## no critic (ProhibitMagicNumbers)
     my $counts_or_fpkm_in_intron =
-        $fields[ 31 + $fpkm ? 1 : 0 ] eq q{-}      ? q{-}
-      : $fields[ 31 + $fpkm ? 1 : 0 ] > $threshold ? q{y}
-      :                                              q{n};
-    my $counts_or_fpkm_in_exons = $fields[ 15 + $fpkm ? 1 : 0 ] > $threshold
-      && $fields[ 20 + $fpkm ? 1 : 0 ] > $COUNT_THRESHOLD ? q{y} : q{n};
+        $fields[ 31 + ( $fpkm ? 1 : 0 ) ] eq q{-}      ? q{-}
+      : $fields[ 31 + ( $fpkm ? 1 : 0 ) ] > $threshold ? q{y}
+      :                                                  q{n};
+    my $counts_or_fpkm_in_exons = $fields[ 15 + ( $fpkm ? 1 : 0 ) ] > $threshold
+      && $fields[ 20 + ( $fpkm ? 1 : 0 ) ] > $COUNT_THRESHOLD ? q{y} : q{n};
     my $counts_or_fpkm_in_repeats =
-        $fields[ 26 + $fpkm ? 1 : 0 ] eq q{-}      ? q{-}
-      : $fields[ 26 + $fpkm ? 1 : 0 ] > $threshold ? q{y}
-      :                                              q{n};
+        $fields[ 26 + ( $fpkm ? 1 : 0 ) ] eq q{-}      ? q{-}
+      : $fields[ 26 + ( $fpkm ? 1 : 0 ) ] > $threshold ? q{y}
+      :                                                  q{n};
     ## use critic
     my $category;
     if ( $counts_or_fpkm_in_intron eq q{-} ) {
