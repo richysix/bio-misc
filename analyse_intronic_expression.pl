@@ -26,6 +26,7 @@ Readonly our $MAPQ_THRESHOLD => 10;
 # Default options
 my $bam_file;
 my $repeats_file;
+my $perfect_matches;
 my $slice_regexp;
 my $species        = 'Mus musculus';
 my $ensembl_dbhost = 'ensembldb.ensembl.org';
@@ -442,6 +443,7 @@ sub count_overlapping {    ## no critic (ProhibitManyArgs)
         next
           if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
           && $alignment->strand != $region_strand;
+        next if $perfect_matches && @{ $alignment->cigar_array } > 1;
         next
           if exists $ignore{ $alignment->qname };  # Ignore mate of counted read
         if ( !$alignment->munmapped ) {
@@ -490,8 +492,10 @@ sub count_enclosed {    ## no critic (ProhibitManyArgs)
         next
           if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
           && $alignment->strand != $region_strand;
+        next if $perfect_matches && @{ $alignment->cigar_array } > 1;
         next
           if exists $ignore{ $alignment->qname };  # Ignore mate of counted read
+
         if ( !$alignment->munmapped ) {
             $ignore{ $alignment->qname } = 1;
         }
@@ -538,6 +542,7 @@ sub count_overlapping_multiple {    ## no critic (ProhibitManyArgs)
             next
               if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
               && $alignment->strand != $region_strand;
+            next if $perfect_matches && @{ $alignment->cigar_array } > 1;
             next
               if exists $ignore{ $alignment->qname };
             if ( !$alignment->munmapped ) {
@@ -594,8 +599,10 @@ sub count_enclosed_multiple {    ## no critic (ProhibitManyArgs)
             next
               if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
               && $alignment->strand != $region_strand;
+            next if $perfect_matches && @{ $alignment->cigar_array } > 1;
             next
               if exists $ignore{ $alignment->qname };
+
             if ( !$alignment->munmapped ) {
                 $ignore{ $alignment->qname } = 1;
             }
@@ -623,6 +630,7 @@ sub get_and_check_options {
     GetOptions(
         'bam_file=s'       => \$bam_file,
         'repeats_file=s'   => \$repeats_file,
+        'perfect_matches'  => \$perfect_matches,
         'slice_regexp=s'   => \$slice_regexp,
         'species=s'        => \$species,
         'ensembl_dbhost=s' => \$ensembl_dbhost,
@@ -683,6 +691,7 @@ This script analyses intronic expression.
     analyse_intronic_expression.pl
         [--bam_file file]
         [--repeats_file file]
+        [--perfect_matches]
         [--slice_regexp regexp]
         [--species species]
         [--ensembl_dbhost host]
@@ -704,6 +713,10 @@ BAM file to analyse.
 =item B<--repeats_file FILE>
 
 RepeatMasker repeats file.
+
+=item B<--slice_regexp>
+
+Only count perfectly matching reads (in terms of alignment).
 
 =item B<--slice_regexp REGEXP>
 
