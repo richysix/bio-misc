@@ -437,12 +437,7 @@ sub count_overlapping {    ## no critic (ProhibitManyArgs)
     while ( my $alignment = $alignments->next_seq ) {
         next if $alignment->get_tag_values('FLAGS') =~ m/\bDUPLICATE\b/xms;
         next if $alignment->qual < $MAPQ_THRESHOLD;
-        next
-          if $alignment->get_tag_values('FLAGS') =~ m/\bFIRST_MATE\b/xms
-          && $alignment->strand == $region_strand;
-        next
-          if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
-          && $alignment->strand != $region_strand;
+        next if $alignment->strand != $region_strand;
         next if $perfect_matches && @{ $alignment->cigar_array } > 1;
         next
           if exists $ignore{ $alignment->qname };  # Ignore mate of counted read
@@ -486,12 +481,7 @@ sub count_enclosed {    ## no critic (ProhibitManyArgs)
         next if $alignment->end > $region_end;
         next if $alignment->get_tag_values('FLAGS') =~ m/\bDUPLICATE\b/xms;
         next if $alignment->qual < $MAPQ_THRESHOLD;
-        next
-          if $alignment->get_tag_values('FLAGS') =~ m/\bFIRST_MATE\b/xms
-          && $alignment->strand == $region_strand;
-        next
-          if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
-          && $alignment->strand != $region_strand;
+        next if $alignment->strand != $region_strand;
         next if $perfect_matches && @{ $alignment->cigar_array } > 1;
         next
           if exists $ignore{ $alignment->qname };  # Ignore mate of counted read
@@ -536,12 +526,7 @@ sub count_overlapping_multiple {    ## no critic (ProhibitManyArgs)
         while ( my $alignment = $alignments->next_seq ) {
             next if $alignment->get_tag_values('FLAGS') =~ m/\bDUPLICATE\b/xms;
             next if $alignment->qual < $MAPQ_THRESHOLD;
-            next
-              if $alignment->get_tag_values('FLAGS') =~ m/\bFIRST_MATE\b/xms
-              && $alignment->strand == $region_strand;
-            next
-              if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
-              && $alignment->strand != $region_strand;
+            next if $alignment->strand != $region_strand;
             next if $perfect_matches && @{ $alignment->cigar_array } > 1;
             next
               if exists $ignore{ $alignment->qname };
@@ -593,12 +578,7 @@ sub count_enclosed_multiple {    ## no critic (ProhibitManyArgs)
             next if $alignment->end > $region_end;
             next if $alignment->get_tag_values('FLAGS') =~ m/\bDUPLICATE\b/xms;
             next if $alignment->qual < $MAPQ_THRESHOLD;
-            next
-              if $alignment->get_tag_values('FLAGS') =~ m/\bFIRST_MATE\b/xms
-              && $alignment->strand == $region_strand;
-            next
-              if $alignment->get_tag_values('FLAGS') =~ m/\bSECOND_MATE\b/xms
-              && $alignment->strand != $region_strand;
+            next if $alignment->strand != $region_strand;
             next if $perfect_matches && @{ $alignment->cigar_array } > 1;
             next
               if exists $ignore{ $alignment->qname };
