@@ -22,8 +22,8 @@ Readonly our $COUNT_THRESHOLD => 10;
 Readonly our $FPKM_THRESHOLD  => 1;
 
 # Default options
-my ( $debug, $help, $man );
 my $fpkm;
+my ( $debug, $help, $man );
 
 # Get and check command line options
 get_and_check_options();
