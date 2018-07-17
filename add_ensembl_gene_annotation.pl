@@ -57,24 +57,37 @@ else {
 # Iterate over STDIN and add annotation
 while ( my $line = <> ) {
     chomp $line;
-    my ( @biotypes, @names, @descriptions );
+    my ( @chrs, @starts, @ends, @strands, @biotypes, @names, @descriptions );
     while ( $line =~ m/($prefix\d+)/xmsg ) {
         my $gene = $ga->fetch_by_stable_id($1);
         if ($gene) {
+            push @chrs,     $gene->seq_region_name;
+            push @starts,   $gene->seq_region_start;
+            push @ends,     $gene->seq_region_end;
+            push @strands,  $gene->seq_region_strand;
             push @biotypes, $gene->biotype;
             push @names, ( $gene->external_name || $gene->stable_id );
             push @descriptions, ( $gene->description || q{} );
         }
     }
     if ( !scalar @biotypes ) {
+        @chrs         = (q{});
+        @starts       = (q{});
+        @ends         = (q{});
+        @strands      = (q{});
         @biotypes     = (q{});
         @names        = (q{});
         @descriptions = (q{});
     }
+    my $chr         = join q{,}, @chrs;
+    my $start       = join q{,}, @starts;
+    my $end         = join q{,}, @ends;
+    my $strand      = join q{,}, @strands;
     my $biotype     = join q{,}, @biotypes;
     my $name        = join q{,}, @names;
     my $description = join q{,}, @descriptions;
-    printf "%s\t%s\t%s\t%s\n", $line, $biotype, $name, $description;
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $line, $chr, $start, $end,
+      $strand, $biotype, $name, $description;
 }
 
 # Get and check command line options
