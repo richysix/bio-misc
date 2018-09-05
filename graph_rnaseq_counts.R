@@ -103,7 +103,14 @@ if (grepl("violin", plotStyle)) {
 } else {
     for (i in 1:nrow(data)) {
         if (!grepl("pdf$", outputFile)) {
-            svg(paste0(outputFile, i, '.svg'))
+            if (grepl("eps$", outputFile)) {
+                epsFile <- gsub('eps$', paste0(i, '.eps'), outputFile)
+                postscript(file = epsFile, width = 7, height = 6,
+                           paper = 'special', horizontal = FALSE)
+            } else {
+                # assume svg
+                svg(paste0(outputFile, i, '.svg'))
+            }
         }
         if (shapeVariable == 'none') {
             palette(rainbow(length(levels(samples$condition))))
