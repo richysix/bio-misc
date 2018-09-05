@@ -104,6 +104,7 @@ foreach my $heading (@headings) {
     }
 }
 my @genes;
+my %description_for;
 my %counts_for;
 my %l2fc_for;
 while ( my $line = <$all_fh> ) {
@@ -111,6 +112,7 @@ while ( my $line = <$all_fh> ) {
     my @fields = split /\t/xms, $line;
     next if $fields[2] eq 'NA';    # No adjusted p-value
     push @genes, $fields[0];
+    $description_for{ $fields[0] } = $fields[9];
     foreach my $sample (@samples) {
         push @{ $counts_for{$sample} }, $fields[ $sample_to_col{$sample} ];
     }
@@ -129,7 +131,7 @@ foreach my $i ( 0 .. ( scalar @genes ) - 1 ) {
     foreach my $sample (@samples) {
         push @counts, $counts_for{$sample}->[$i];
     }
-    printf {$gct_fh} "%s\tNA\t%s\n", $genes[$i], ( join "\t", @counts );
+    printf {$gct_fh} "%s\t%s\t%s\n", $genes[$i], $description_for{ $genes[$i] }, ( join "\t", @counts );
 }
 close $gct_fh;
 
