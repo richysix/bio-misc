@@ -27,8 +27,9 @@ my $samples_file;
 my @comparisons;
 my $remove_other_conditions;
 my $interaction;
-my $lfc_threshold = 0;
-my $memory        = 4000;    ## no critic (ProhibitMagicNumbers)
+my $lfc_threshold          = 0;
+my $memory                 = 4000;    ## no critic (ProhibitMagicNumbers)
+my $strip_condition_prefix = 1;
 my ( $debug, $help, $man );
 
 # Get and check command line options
@@ -61,12 +62,16 @@ while ( my $line = <$samples_fh> ) {
 close $samples_fh;
 
 # Remove common prefix from conditions
-my $prefix =
-  scalar keys %is_condition > 1 ? get_common_prefix( keys %is_condition ) : q{};
-%is_condition = ();
-foreach my $sample ( keys %condition_for ) {
-    $condition_for{$sample} =~ s/\A $prefix //xms;
-    $is_condition{ $condition_for{$sample} } = 1;
+if ($strip_condition_prefix) {
+    my $prefix =
+      scalar keys %is_condition > 1
+      ? get_common_prefix( keys %is_condition )
+      : q{};
+    %is_condition = ();
+    foreach my $sample ( keys %condition_for ) {
+        $condition_for{$sample} =~ s/\A $prefix //xms;
+        $is_condition{ $condition_for{$sample} } = 1;
+    }
 }
 
 my @all_conditions = sort keys %is_condition;
@@ -285,6 +290,7 @@ sub get_and_check_options {
         'interaction'             => \$interaction,
         'lfc_threshold=i'         => \$lfc_threshold,
         'memory=i'                => \$memory,
+        'strip_condition_prefix!' => \$strip_condition_prefix,
         'debug'                   => \$debug,
         'help'                    => \$help,
         'man'                     => \$man,
@@ -354,6 +360,7 @@ specified or all conditions.
         [--remove_other_conditions]
         [--interaction]
         [--lfc_threshold int]
+        [--strip_condition_prefix/--nostrip_condition_prefix]
         [--debug]
         [--help]
         [--man]
@@ -398,6 +405,11 @@ Log2 fold change threshold for significance.
 =item B<--memory>
 
 Memory to allocate for each LSF job.
+
+=item B<--strip_condition_prefix>
+
+Remove common prefix from conditions. This option is on by default.
+Supplying the option --nostrip_condition_prefix turns this off.
 
 =item B<--debug>
 
