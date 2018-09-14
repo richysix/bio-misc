@@ -3,6 +3,7 @@
 # Volcano plot from RNA-Seq output produced by:
 # https://gist.github.com/iansealy/2dca28d07c0764e014df
 # or https://gist.github.com/iansealy/b9cbc56bd1affe10d37a
+library('svglite')
 
 Args        <- commandArgs()
 dataFile    <- ifelse(is.na(Args[6]), "all.tsv",     Args[6])
@@ -23,7 +24,11 @@ names(data)[names(data) == 'adjpval'] <- 'adjp'
 names(data)[names(data) == 'Gene ID'] <- 'GeneID'
 
 # Plot (red if adjp < 0.05; orange if log2fc > 1; green if both)
-png(outputFile)
+if ( grepl("svg$", outputFile) ) {
+    svglite(outputFile)
+} else {
+    png(outputFile)
+}
 if ( is.na(maxLog2Fc) ) {
     maxLog2Fc <- c(-max(abs(data$log2fc), na.rm=TRUE),
                    max(abs(data$log2fc), na.rm=TRUE))
