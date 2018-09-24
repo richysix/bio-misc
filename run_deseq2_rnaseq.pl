@@ -99,11 +99,12 @@ if ( !@comparisons ) {
         confess "Only one condition (@all_conditions) for $output_dir";
     }
 
-    my ($wt)  = grep { m/(\b|_)wt \z/xms } @all_conditions;
-    my ($het) = grep { m/(\b|_)het \z/xms } @all_conditions;
-    my ($hom) = grep { m/(\b|_)hom \z/xms } @all_conditions;
-    my ($sib) = grep { m/(\b|_)sib \z/xms } @all_conditions;
-    my ($mut) = grep { m/(\b|_)mut \z/xms } @all_conditions;
+    my ($wt)   = grep { m/(\b|_)wt   \z/xms } @all_conditions;
+    my ($het)  = grep { m/(\b|_)het  \z/xms } @all_conditions;
+    my ($hom)  = grep { m/(\b|_)hom  \z/xms } @all_conditions;
+    my ($hemi) = grep { m/(\b|_)hemi \z/xms } @all_conditions;
+    my ($sib)  = grep { m/(\b|_)sib  \z/xms } @all_conditions;
+    my ($mut)  = grep { m/(\b|_)mut  \z/xms } @all_conditions;
 
     if ( $wt && $het && $hom ) {
         push @comparisons, "$het:$wt";
@@ -112,13 +113,35 @@ if ( !@comparisons ) {
         push @comparisons, "$hom:$het,$wt";
         push @comparisons, "$hom,$het:$wt";
     }
+    if ( $wt && $het && $hemi ) {
+        push @comparisons, "$het:$wt";
+        push @comparisons, "$hemi:$wt";
+        push @comparisons, "$hemi:$het";
+        push @comparisons, "$hemi:$het,$wt";
+        push @comparisons, "$hemi,$het:$wt";
+    }
+    if ( $wt && $het && $hom && $hemi ) {
+        push @comparisons, "$het:$wt";
+        push @comparisons, "$hom:$wt";
+        push @comparisons, "$hemi:$wt";
+        push @comparisons, "$hom:$het";
+        push @comparisons, "$hemi:$het";
+        push @comparisons, "$hom:$het,$wt";
+        push @comparisons, "$hom,$het:$wt";
+        push @comparisons, "$hemi:$het,$wt";
+        push @comparisons, "$hemi,$het:$wt";
+        push @comparisons, "$hom,$hemi:$het,$wt";
+    }
     if ( !@comparisons ) {
         @comparisons =
-            $wt  && $het ? ("$het:$wt")
-          : $wt  && $hom ? ("$hom:$wt")
-          : $het && $hom ? ("$hom:$het")
-          : $sib && $mut ? ("$mut:$sib")
-          :                ();
+            $wt  && $het  ? ("$het:$wt")
+          : $wt  && $hom  ? ("$hom:$wt")
+          : $wt  && $hemi ? ("$hemi:$wt")
+          : $het && $hom  ? ("$hom:$het")
+          : $het && $hemi ? ("$hemi:$het")
+          : $hom && $hemi ? ("$hom:$hemi")
+          : $sib && $mut  ? ("$mut:$sib")
+          :                 ();
     }
 }
 
