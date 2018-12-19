@@ -7,6 +7,7 @@
 library(ggplot2)
 library(reshape2)
 suppressPackageStartupMessages(library(dplyr))
+library(svglite)
 
 Args           <- commandArgs()
 dataFile       <- ifelse(is.na(Args[6]),  "all.tsv",            Args[6])
@@ -109,7 +110,7 @@ if (grepl("violin", plotStyle)) {
                            paper = 'special', horizontal = FALSE)
             } else {
                 # assume svg
-                svg(paste0(outputFile, i, '.svg'))
+                svglite(paste0(outputFile, i, '.svg'))
             }
         }
         if (shapeVariable == 'none') {
