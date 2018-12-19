@@ -24,7 +24,6 @@ names(data)[names(data) == 'adjpval'] <- 'adjp'
 names(data)[names(data) == 'Gene ID'] <- 'GeneID'
 
 # Plot (red if adjp < 0.05; orange if log2fc > 1; green if both)
-# decide on output type. Default is png
 if ( grepl("svg$", outputFile) ) {
     svglite(outputFile)
 } else {

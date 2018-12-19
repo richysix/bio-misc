@@ -27,8 +27,9 @@ my $samples_file;
 my @comparisons;
 my $remove_other_conditions;
 my $interaction;
-my $lfc_threshold = 0;
-my $memory        = 4000;    ## no critic (ProhibitMagicNumbers)
+my $lfc_threshold          = 0;
+my $memory                 = 4000;    ## no critic (ProhibitMagicNumbers)
+my $strip_condition_prefix = 1;
 my ( $debug, $help, $man );
 
 # Get and check command line options
@@ -61,12 +62,16 @@ while ( my $line = <$samples_fh> ) {
 close $samples_fh;
 
 # Remove common prefix from conditions
-my $prefix =
-  scalar keys %is_condition > 1 ? get_common_prefix( keys %is_condition ) : q{};
-%is_condition = ();
-foreach my $sample ( keys %condition_for ) {
-    $condition_for{$sample} =~ s/\A $prefix //xms;
-    $is_condition{ $condition_for{$sample} } = 1;
+if ($strip_condition_prefix) {
+    my $prefix =
+      scalar keys %is_condition > 1
+      ? get_common_prefix( keys %is_condition )
+      : q{};
+    %is_condition = ();
+    foreach my $sample ( keys %condition_for ) {
+        $condition_for{$sample} =~ s/\A $prefix //xms;
+        $is_condition{ $condition_for{$sample} } = 1;
+    }
 }
 
 my @all_conditions = sort keys %is_condition;
@@ -94,11 +99,12 @@ if ( !@comparisons ) {
         confess "Only one condition (@all_conditions) for $output_dir";
     }
 
-    my ($wt)  = grep { m/(\b|_)wt \z/xms } @all_conditions;
-    my ($het) = grep { m/(\b|_)het \z/xms } @all_conditions;
-    my ($hom) = grep { m/(\b|_)hom \z/xms } @all_conditions;
-    my ($sib) = grep { m/(\b|_)sib \z/xms } @all_conditions;
-    my ($mut) = grep { m/(\b|_)mut \z/xms } @all_conditions;
+    my ($wt)   = grep { m/(\b|_)wt   \z/xms } @all_conditions;
+    my ($het)  = grep { m/(\b|_)het  \z/xms } @all_conditions;
+    my ($hom)  = grep { m/(\b|_)hom  \z/xms } @all_conditions;
+    my ($hemi) = grep { m/(\b|_)hemi \z/xms } @all_conditions;
+    my ($sib)  = grep { m/(\b|_)sib  \z/xms } @all_conditions;
+    my ($mut)  = grep { m/(\b|_)mut  \z/xms } @all_conditions;
 
     if ( $wt && $het && $hom ) {
         push @comparisons, "$het:$wt";
@@ -107,13 +113,35 @@ if ( !@comparisons ) {
         push @comparisons, "$hom:$het,$wt";
         push @comparisons, "$hom,$het:$wt";
     }
+    if ( $wt && $het && $hemi ) {
+        push @comparisons, "$het:$wt";
+        push @comparisons, "$hemi:$wt";
+        push @comparisons, "$hemi:$het";
+        push @comparisons, "$hemi:$het,$wt";
+        push @comparisons, "$hemi,$het:$wt";
+    }
+    if ( $wt && $het && $hom && $hemi ) {
+        push @comparisons, "$het:$wt";
+        push @comparisons, "$hom:$wt";
+        push @comparisons, "$hemi:$wt";
+        push @comparisons, "$hom:$het";
+        push @comparisons, "$hemi:$het";
+        push @comparisons, "$hom:$het,$wt";
+        push @comparisons, "$hom,$het:$wt";
+        push @comparisons, "$hemi:$het,$wt";
+        push @comparisons, "$hemi,$het:$wt";
+        push @comparisons, "$hom,$hemi:$het,$wt";
+    }
     if ( !@comparisons ) {
         @comparisons =
-            $wt  && $het ? ("$het:$wt")
-          : $wt  && $hom ? ("$hom:$wt")
-          : $het && $hom ? ("$hom:$het")
-          : $sib && $mut ? ("$mut:$sib")
-          :                ();
+            $wt  && $het  ? ("$het:$wt")
+          : $wt  && $hom  ? ("$hom:$wt")
+          : $wt  && $hemi ? ("$hemi:$wt")
+          : $het && $hom  ? ("$hom:$het")
+          : $het && $hemi ? ("$hemi:$het")
+          : $hom && $hemi ? ("$hom:$hemi")
+          : $sib && $mut  ? ("$mut:$sib")
+          :                 ();
     }
 }
 
@@ -285,6 +313,7 @@ sub get_and_check_options {
         'interaction'             => \$interaction,
         'lfc_threshold=i'         => \$lfc_threshold,
         'memory=i'                => \$memory,
+        'strip_condition_prefix!' => \$strip_condition_prefix,
         'debug'                   => \$debug,
         'help'                    => \$help,
         'man'                     => \$man,
@@ -354,6 +383,7 @@ specified or all conditions.
         [--remove_other_conditions]
         [--interaction]
         [--lfc_threshold int]
+        [--strip_condition_prefix/--nostrip_condition_prefix]
         [--debug]
         [--help]
         [--man]
@@ -398,6 +428,11 @@ Log2 fold change threshold for significance.
 =item B<--memory>
 
 Memory to allocate for each LSF job.
+
+=item B<--strip_condition_prefix>
+
+Remove common prefix from conditions. This option is on by default.
+Supplying the option --nostrip_condition_prefix turns this off.
 
 =item B<--debug>
 
