@@ -27,7 +27,8 @@ my $samples_file;
 my $min_clusters = 2;
 my $max_clusters = 16;    ## no critic (ProhibitMagicNumbers)
 my $interval;
-my $memory                 = 4000;    ## no critic (ProhibitMagicNumbers)
+my $r_cmd                  = 'Rscript';
+my $memory                 = 4000;        ## no critic (ProhibitMagicNumbers)
 my $strip_condition_prefix = 1;
 my ( $debug, $help, $man );
 
@@ -163,7 +164,7 @@ EOF
         # Run R script under LSF
         printf "Running %s\n", "$dir/coseq.R";
         my $cmd = <<"EOF";
-bsub -q long -o $dir/coseq.o -e $dir/coseq.e -R'select[mem>$memory] rusage[mem=$memory]' -M$memory "Rscript $dir/coseq.R"
+bsub -q long -o $dir/coseq.o -e $dir/coseq.e -R'select[mem>$memory] rusage[mem=$memory]' -M$memory "$r_cmd $dir/coseq.R"
 EOF
         WIFEXITED( system $cmd) or confess "Couldn't run $cmd ($OS_ERROR)";
     }
@@ -203,6 +204,7 @@ sub get_and_check_options {
         'min_clusters=i'          => \$min_clusters,
         'max_clusters=i'          => \$max_clusters,
         'interval=i'              => \$interval,
+        'r_cmd=s'                 => \$r_cmd,
         'memory=i'                => \$memory,
         'strip_condition_prefix!' => \$strip_condition_prefix,
         'debug'                   => \$debug,
@@ -281,6 +283,7 @@ This script takes an RNA-Seq counts file and samples file and runs coseq.
         [--min_clusters int]
         [--max_clusters int]
         [--interval int]
+        [--r_cmd command]
         [--memory int]
         [--strip_condition_prefix/--nostrip_condition_prefix]
         [--debug]
@@ -317,6 +320,10 @@ Maximum number of clusters (defaults to 16).
 
 Run additional smaller intervals of specified size (minimum 11) between minimum
 and maximum number of clusters.
+
+=item B<--r_cmd COMMAND>
+
+Command for running R (defaults to Rscript).
 
 =item B<--memory INT>
 

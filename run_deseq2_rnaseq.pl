@@ -28,7 +28,8 @@ my @comparisons;
 my $remove_other_conditions;
 my $interaction;
 my $lfc_threshold          = 0;
-my $memory                 = 4000;    ## no critic (ProhibitMagicNumbers)
+my $r_cmd                  = 'Rscript';
+my $memory                 = 4000;        ## no critic (ProhibitMagicNumbers)
 my $strip_condition_prefix = 1;
 my ( $debug, $help, $man );
 
@@ -272,7 +273,7 @@ EOF
     # Run R script under LSF
     printf "Running %s\n", "$dir/deseq2.R";
     my $cmd = <<"EOF";
-bsub -o $dir/deseq2.o -e $dir/deseq2.e -R'select[mem>$memory] rusage[mem=$memory]' -M$memory "Rscript $dir/deseq2.R"
+bsub -o $dir/deseq2.o -e $dir/deseq2.e -R'select[mem>$memory] rusage[mem=$memory]' -M$memory "$r_cmd $dir/deseq2.R"
 EOF
     WIFEXITED( system $cmd) or confess "Couldn't run $cmd ($OS_ERROR)";
 }
@@ -312,6 +313,7 @@ sub get_and_check_options {
         'remove_other_conditions' => \$remove_other_conditions,
         'interaction'             => \$interaction,
         'lfc_threshold=i'         => \$lfc_threshold,
+        'r_cmd=s'                 => \$r_cmd,
         'memory=i'                => \$memory,
         'strip_condition_prefix!' => \$strip_condition_prefix,
         'debug'                   => \$debug,
@@ -383,6 +385,7 @@ specified or all conditions.
         [--remove_other_conditions]
         [--interaction]
         [--lfc_threshold int]
+        [--r_cmd command]
         [--memory int]
         [--strip_condition_prefix/--nostrip_condition_prefix]
         [--debug]
@@ -425,6 +428,10 @@ Include an interaction term in multi-factor designs.
 =item B<--lfc_threshold>
 
 Log2 fold change threshold for significance.
+
+=item B<--r_cmd COMMAND>
+
+Command for running R (defaults to Rscript).
 
 =item B<--memory>
 
