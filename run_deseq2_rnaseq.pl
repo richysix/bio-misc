@@ -383,6 +383,7 @@ specified or all conditions.
         [--remove_other_conditions]
         [--interaction]
         [--lfc_threshold int]
+        [--memory int]
         [--strip_condition_prefix/--nostrip_condition_prefix]
         [--debug]
         [--help]
