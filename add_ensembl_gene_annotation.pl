@@ -141,11 +141,11 @@ annotation.
 
     perl \
         -Ibranch-ensembl-75/ensembl/modules \
-        get_ensembl_gene_annotation.pl < input.txt
+        add_ensembl_gene_annotation.pl < input.txt
 
 =head1 USAGE
 
-    get_ensembl_gene_annotation.pl
+    add_ensembl_gene_annotation.pl
         [--prefix prefix]
         [--species species]
         [--ensembl_dbhost host]
