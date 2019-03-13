@@ -50,7 +50,7 @@ names(data)[names(data) == 'adjpval'] <- 'adjp'
 samples <- read.table( samplesFile, header=TRUE, row.names=1 )
 
 # Ensure chromosome is a factor, even if all numeric
-data[,1] <- factor(data[,1])
+data[,'Chr'] <- factor(data[,'Chr'])
 
 # Get counts
 countData <- data[,grepl(" count$", names(data)) &
@@ -147,10 +147,10 @@ for (i in seq.int(lastSigPC - 1)) {
 # Plot proportion of variance explained by each region across chromosome
 varMax <- max(propVarRegion[,1:lastSigPC])
 propVarRegion <- as.data.frame(propVarRegion[,1:lastSigPC])
-propVarRegion$region <- rowMeans(data[select, c(2,3)])
-propVarRegion$chr <- data[select, 1]
-chrs <- sort(unique(as.numeric(levels(data[,1])[grepl("^[0-9]+$",
-    levels(data[,1]))])))
+propVarRegion$region <- rowMeans(data[select, c('Start', 'End')])
+propVarRegion$chr <- data[select, 'Chr']
+chrs <- sort(unique(as.numeric(levels(data[,'Chr'])[grepl("^[0-9]+$",
+    levels(data[,'Chr']))])))
 for (chr in chrs) {
     var_long <- melt(propVarRegion[propVarRegion$chr == chr,1:ncol(propVarRegion)-1],
         id="region", variable.name="PC")
