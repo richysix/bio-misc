@@ -7,6 +7,7 @@
 library(ggplot2)
 library(reshape2)
 suppressPackageStartupMessages(library(dplyr))
+library(svglite)
 
 Args           <- commandArgs()
 dataFile       <- ifelse(is.na(Args[6]),  "all.tsv",            Args[6])
@@ -103,7 +104,14 @@ if (grepl("violin", plotStyle)) {
 } else {
     for (i in 1:nrow(data)) {
         if (!grepl("pdf$", outputFile)) {
-            svg(paste0(outputFile, i, '.svg'))
+            if (grepl("eps$", outputFile)) {
+                epsFile <- gsub('eps$', paste0(i, '.eps'), outputFile)
+                postscript(file = epsFile, width = 7, height = 6,
+                           paper = 'special', horizontal = FALSE)
+            } else {
+                # assume svg
+                svglite(paste0(outputFile, i, '.svg'))
+            }
         }
         if (shapeVariable == 'none') {
             palette(rainbow(length(levels(samples$condition))))
