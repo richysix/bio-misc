@@ -246,8 +246,8 @@ suppressWarnings(library(tcltk))
 suppressPackageStartupMessages(library(DESeq2))
 suppressPackageStartupMessages(library(RColorBrewer))
 suppressPackageStartupMessages(library(gplots))
-countData <- read.table( "$new_counts_file", header=TRUE, row.names=1 )
-samples <- read.table( "$new_samples_file", header=TRUE, row.names=1 )
+countData <- read.table( "$new_counts_file", header=TRUE, row.names=1, check.names=FALSE )
+samples <- read.table( "$new_samples_file", header=TRUE, row.names=1, check.names=FALSE )
 dds <- DESeqDataSetFromMatrix(countData, samples, design = ~ $design)
 dds <- DESeq(dds)
 write.table(sizeFactors(dds), file="$dir/size-factors.txt", col.names=FALSE, quote=FALSE, sep="\\t")
@@ -412,7 +412,7 @@ determines the order of the columns in the output.
 
 =item B<--comparisons COMPARISONS>
 
-Condition comparisons. Each comparison is a pair of experimental and controls
+Condition comparisons. Each comparison is a pair of experimental and control
 conditions (in that order) separated by a colon (e.g. hom:wt). If multiple
 conditions are to be combined then separate them with a comma (e.g. hom:wt,het).
 To rename a condition, append an equals sign (e.g. hom=mut:het,wt=sib).

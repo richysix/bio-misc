@@ -109,7 +109,7 @@ if (grepl("violin", plotStyle)) {
                 postscript(file = epsFile, width = 7, height = 6,
                            paper = 'special', horizontal = FALSE)
             } else {
-                # assume svg
+                # Assume SVG
                 svglite(paste0(outputFile, i, '.svg'))
             }
         }
