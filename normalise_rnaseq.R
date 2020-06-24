@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-suppressWarnings(library(tcltk))
+#suppressWarnings(library(tcltk))
 suppressPackageStartupMessages(library(DESeq2))
 
 Args        <- commandArgs()
