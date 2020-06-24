@@ -4,7 +4,7 @@
 # https://gist.github.com/iansealy/2dca28d07c0764e014df
 # or https://gist.github.com/iansealy/b9cbc56bd1affe10d37a
 
-suppressWarnings(library(tcltk))
+#suppressWarnings(library(tcltk))
 suppressPackageStartupMessages(library(DESeq2))
 suppressPackageStartupMessages(library(genefilter))
 suppressPackageStartupMessages(library(ggplot2))
@@ -19,6 +19,7 @@ transformMethod    <- ifelse(is.na(Args[10]), "rlog",               Args[10])
 regionCount        <- ifelse(is.na(Args[11]), 500,         as.integer(Args[11]))
 varPCThreshold     <- ifelse(is.na(Args[12]), 1,           as.numeric(Args[12]))
 varRegionThreshold <- ifelse(is.na(Args[13]), 0.1,         as.numeric(Args[13]))
+includeLoadings    <- ifelse(is.na(Args[14]), FALSE,       as.logical(Args[14]))
 
 remove_common_prefix <- function(names) {
     common_prefix_length <- 0
@@ -53,9 +54,9 @@ samples <- read.table( samplesFile, header=TRUE, row.names=1 )
 data[,'Chr'] <- factor(data[,'Chr'])
 
 # Get counts
-countData <- data[,grepl(" count$", names(data)) &
-                  !grepl(" normalised count$", names(data))]
-names(countData) <- gsub(" count$", "", names(countData))
+countData <- data[,grepl(".count$", names(data)) &
+                  !grepl(".normalised.count$", names(data))]
+names(countData) <- gsub(".count$", "", names(countData))
 
 # Subset and reorder count data
 countData <- countData[, row.names(samples)]
@@ -76,6 +77,9 @@ pca <- prcomp(t(assay(dds)[select,]))
 propVarPC <- pca$sdev^2 / sum( pca$sdev^2 )
 aload <- abs(pca$rotation)
 propVarRegion <- sweep(aload, 2, colSums(aload), "/")
+if (includeLoadings) {
+    loadings <- sweep(pca$rotation, 2, colSums(aload), "/")
+}
 
 # Output PC coordinates
 lastSigPC <- sum(propVarPC * 100 >= varPCThreshold)
@@ -89,6 +93,9 @@ if (grepl("csv$", dataFile)) {
 # Output regions contributing most to each PC
 for (i in seq.int(lastSigPC)) {
     data[select, "% variance explained"] <- propVarRegion[,i] * 100
+    if (includeLoadings) {
+        data[select, "loadings"] <- loadings[,i]
+    }
     topData <- subset(data[order(data$`% variance explained`,
         decreasing=TRUE),], `% variance explained` >= varRegionThreshold)
     write.table( topData, file=paste0(outputBase, "-PC", i, ".tsv"),
