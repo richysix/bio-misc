@@ -48,7 +48,7 @@ names(data)[names(data) == 'ID']      <- 'Gene.ID'
 names(data)[names(data) == 'adjpval'] <- 'adjp'
 
 # Read samples
-samples <- read.table( samplesFile, header=TRUE, row.names=1 )
+samples <- read.delim( samplesFile, header=TRUE, row.names=1 )
 
 # Ensure chromosome is a factor, even if all numeric
 data[,'Chr'] <- factor(data[,'Chr'])
