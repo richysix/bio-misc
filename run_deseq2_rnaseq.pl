@@ -28,6 +28,7 @@ my @comparisons;
 my $remove_other_conditions;
 my $interaction;
 my $lfc_threshold          = 0;
+my $pval_threshold         = 0.05;
 my $r_cmd                  = 'Rscript';
 my $memory                 = 4000;        ## no critic (ProhibitMagicNumbers)
 my $strip_condition_prefix = 1;
@@ -252,7 +253,7 @@ dds <- DESeqDataSetFromMatrix(countData, samples, design = ~ $design)
 dds <- DESeq(dds)
 write.table(sizeFactors(dds), file="$dir/size-factors.txt", col.names=FALSE, quote=FALSE, sep="\\t")
 write.table(counts(dds, normalized=TRUE), file="$dir/normalised-counts.txt", col.names=FALSE, quote=FALSE, sep="\\t")
-res <- results(dds, contrast=c("condition", "$exp_name", "$con_name"), lfcThreshold=$lfc_threshold)
+res <- results(dds, contrast=c("condition", "$exp_name", "$con_name"), lfcThreshold=$lfc_threshold, alpha = $pval_threshold)
 out <- data.frame(pvalue=res\$pvalue, padj=res\$padj, log2fc=res\$log2FoldChange, row.names=rownames(res))
 write.table(out, file="$dir/output.txt", col.names=FALSE, row.names=TRUE, quote=FALSE, sep="\\t")
 pdf("$dir/qc.pdf")
@@ -313,6 +314,7 @@ sub get_and_check_options {
         'remove_other_conditions' => \$remove_other_conditions,
         'interaction'             => \$interaction,
         'lfc_threshold=i'         => \$lfc_threshold,
+        'pval_threshold=f'        => \$pval_threshold,
         'r_cmd=s'                 => \$r_cmd,
         'memory=i'                => \$memory,
         'strip_condition_prefix!' => \$strip_condition_prefix,
@@ -385,6 +387,7 @@ specified or all conditions.
         [--remove_other_conditions]
         [--interaction]
         [--lfc_threshold int]
+        [--pval_threshold float]
         [--r_cmd command]
         [--memory int]
         [--strip_condition_prefix/--nostrip_condition_prefix]
@@ -428,6 +431,10 @@ Include an interaction term in multi-factor designs.
 =item B<--lfc_threshold>
 
 Log2 fold change threshold for significance.
+
+=item B<--pval_threshold>
+
+p-value cut-off for significance. Default: 0.05
 
 =item B<--r_cmd COMMAND>
 
